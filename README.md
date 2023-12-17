@@ -22,6 +22,8 @@ This is a plugin for [PowerToys Run](https://github.com/microsoft/PowerToys/wiki
 1. Open PowerToys Run (default shortcut is `Alt+Space`).
 2. Type `sc` followed by your search query.
 3. Select a package from the search results and press `Enter` to install it.
+4. Press `Ctrl+H` to open the homepage of the package.
+5. When a package is installed, press `Ctrl+U` to update it or `Ctrl+D` to uninstall it.
 
 ## Build
 
