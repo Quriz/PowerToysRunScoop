@@ -11,7 +11,6 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Wox.Infrastructure;
 
 namespace Community.PowerToys.Run.Plugin.Scoop;
@@ -59,6 +58,7 @@ public partial class Scoop : IDisposable
     }
 
     private const string SearchUrl = "https://scoopsearch.search.windows.net/indexes/apps/docs/search?api-version=2020-06-30";
+    private const string ApiKey = "YourApiKeyHere";
 
     public HashSet<string> InstalledApps => _installedApps ??= GetInstalledApps();
 
@@ -73,11 +73,7 @@ public partial class Scoop : IDisposable
 
     public Scoop()
     {
-        var config = new ConfigurationBuilder()
-            .AddUserSecrets<Scoop>()
-            .Build();
-
-        _httpClient.DefaultRequestHeaders.Add("api-key", config["ApiKey"]);
+        _httpClient.DefaultRequestHeaders.Add("api-key", ApiKey);
 
         GetInstalledApps();
     }
