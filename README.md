@@ -25,15 +25,19 @@ This is a plugin for [PowerToys Run](https://github.com/microsoft/PowerToys/wiki
 
 ## Build
 
+Full setup command:
+```cmd
+git clone https://github.com/microsoft/PowerToys
+cd PowerToys
+git submodule update --init --recursive
+git clone https://github.com/Quriz/PowerToysRunScoop PowerToys/src/modules/launcher/Plugins/Community.PowerToys.Run.Plugin.Scoop
+dotnet sln PowerToys.sln add --solution-folder .\modules\launcher\Plugins .\src\modules\launcher\Plugins\Community.PowerToys.Run.Plugin.Scoop\Community.PowerToys.Run.Plugin.Scoop.csproj
+```
+
 1. Clone the [PowerToys repo](https://github.com/microsoft/PowerToys).
 2. cd into the `PowerToys` directory.
 3. Initialize the submodules: `git submodule update --init --recursive`
 4. Clone this repo into the `PowerToys/src/modules/launcher/Plugins` directory.
-
-    ```cmd
-    git clone https://github.com/Quriz/PowerToysRunScoop PowerToys/src/modules/launcher/Plugins/Community.PowerToys.Run.Plugin.Scoop
-    ```
-   
 5. Open the `PowerToys.sln` solution in Visual Studio.
 6. Add this project to the `PowerToys.sln` solution under the path `PowerToys/src/modules/launcher/Plugins`.
 7. Build the solution.
