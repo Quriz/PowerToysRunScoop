@@ -40,11 +40,7 @@ dotnet sln PowerToys.sln add --solution-folder .\modules\launcher\Plugins .\src\
 4. Clone this repo into the `PowerToys/src/modules/launcher/Plugins` directory.
 5. Open the `PowerToys.sln` solution in Visual Studio.
 6. Add this project to the `PowerToys.sln` solution under the path `PowerToys/src/modules/launcher/Plugins`.
-7. Add the `ApiKey` secret to the project. This is the API key used to connect to Scoop's API from [`scoop.sh`](https://scoop.sh/). You can find it there with a bit of dev tools magic.
-   ```cmd
-   dotnet user-secrets init
-   dotnet user-secrets set "ApiKey" "TheApiKeyHere"
-   ```
+7. Add the `ApiKey` to the [`Scoop.cs`](https://github.com/Quriz/PowerToysRunScoop/blob/main/Scoop.cs#L61) file. This is the API key used to connect to Scoop's API from [`scoop.sh`](https://scoop.sh/). You can find it there with a bit of dev tools magic.
 8. Build the solution.
 9. Run the `PowerToys` project.
 
