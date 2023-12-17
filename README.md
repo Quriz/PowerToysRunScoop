@@ -25,7 +25,7 @@ This is a plugin for [PowerToys Run](https://github.com/microsoft/PowerToys/wiki
 
 ## Build
 
-Full setup command:
+Summarized setup commands for steps 1-6:
 ```cmd
 git clone https://github.com/microsoft/PowerToys
 cd PowerToys
@@ -40,8 +40,13 @@ dotnet sln PowerToys.sln add --solution-folder .\modules\launcher\Plugins .\src\
 4. Clone this repo into the `PowerToys/src/modules/launcher/Plugins` directory.
 5. Open the `PowerToys.sln` solution in Visual Studio.
 6. Add this project to the `PowerToys.sln` solution under the path `PowerToys/src/modules/launcher/Plugins`.
-7. Build the solution.
-8. Run the `PowerToys` project.
+7. Add the `ApiKey` secret to the project. This is the API key used to connect to Scoop's API from [`scoop.sh`](https://scoop.sh/). You can find it there with a bit of dev tools magic.
+   ```cmd
+   dotnet user-secrets init
+   dotnet user-secrets set "ApiKey" "TheApiKeyHere"
+   ```
+8. Build the solution.
+9. Run the `PowerToys` project.
 
 # Thanks to
 
