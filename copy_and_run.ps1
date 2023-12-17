@@ -1,7 +1,7 @@
 # Copies the latest build to PowerToys installation and restarts PowerToys
 
 # Source and destination paths
-$sourcePath = (dotnet msbuild $PSScriptRoot\Community.PowerToys.Run.Plugin.Scoop.csproj /p:Platform=x64 /t:GetSourcePath -nologo).Trim()
+$sourcePath = (dotnet msbuild $PSScriptRoot\Community.PowerToys.Run.Plugin.Scoop.csproj /p:Platform=x64 /p:Configuration=Release /t:GetSourcePath -nologo).Trim()
 $sourcePath = "$PSScriptRoot\$sourcePath"
 $destinationPath = "$env:LOCALAPPDATA\Microsoft\PowerToys\PowerToys Run\Plugins\Scoop"
 
