@@ -6,7 +6,7 @@
     "Author": "Quriz",
     "Version": "1.0.0",
     "Language": "csharp",
-    "Website": "https://github.com/Quriz",
+    "Website": "https://github.com/Quriz/PowerToysRunScoop",
     "IcoPathDark": "Images\\scoop.png",
     "IcoPathLight": "Images\\scoop.png",
     "ExecuteFileName": "Community.PowerToys.Run.Plugin.Scoop.dll"
