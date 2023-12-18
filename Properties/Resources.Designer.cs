@@ -105,11 +105,29 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to get API key for search..
+        /// </summary>
+        public static string plugin_error_api_key {
+            get {
+                return ResourceManager.GetString("plugin_error_api_key", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If you believe this is a plugin error, press Enter to open an issue..
+        /// </summary>
+        public static string plugin_error_api_key_sub {
+            get {
+                return ResourceManager.GetString("plugin_error_api_key_sub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to open {0}..
         /// </summary>
-        public static string plugin_homepage_failed {
+        public static string plugin_error_homepage {
             get {
-                return ResourceManager.GetString("plugin_homepage_failed", resourceCulture);
+                return ResourceManager.GetString("plugin_error_homepage", resourceCulture);
             }
         }
         

@@ -129,7 +129,7 @@
   <data name="context_menu_update" xml:space="preserve">
     <value>Update (Ctrl+U)</value>
   </data>
-  <data name="plugin_homepage_failed" xml:space="preserve">
+  <data name="plugin_error_homepage" xml:space="preserve">
     <value>Failed to open {0}.</value>
   </data>
   <data name="context_menu_homepage" xml:space="preserve">
@@ -143,5 +143,11 @@
   </data>
   <data name="plugin_description_sub" xml:space="preserve">
     <value>Search, install, update, and uninstall Scoop packages.</value>
+  </data>
+  <data name="plugin_error_api_key" xml:space="preserve">
+    <value>Failed to get API key for search.</value>
+  </data>
+  <data name="plugin_error_api_key_sub" xml:space="preserve">
+    <value>If you believe this is a plugin error, press Enter to open an issue.</value>
   </data>
 </root>

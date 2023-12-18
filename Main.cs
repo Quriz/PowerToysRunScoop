@@ -12,6 +12,7 @@ using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -32,6 +33,8 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
     public string Description => Properties.Resources.plugin_description;
 
     public static string PluginID => "be0142a36ee54bd6ab789086d5828b4b";
+
+    private static string RepositoryNewIssueUrl => "https://github.com/Quriz/PowerToysRunScoop/issues/new?labels=bug&title={0}&body={1}";
 
     private Scoop _scoop;
     private Action<string> onPluginError;
@@ -58,8 +61,15 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
         };
     }
 
+    public List<Result> Query(Query query) => Query(query, false);
+
     public List<Result> Query(Query query, bool delayedExecution)
     {
+        if (_scoop.HasApiKeyError)
+        {
+            return ApiKeyErrorQueryResult();
+        }
+
         if (!delayedExecution || query is null || string.IsNullOrWhiteSpace(query.Search))
         {
             return DefaultQueryResult();
@@ -73,7 +83,7 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
             var results = packages.Select(package => GetResult(package, searchTerm)).ToList();
             if (results.Count == 0)
             {
-                return NotFoundResult(searchTerm);
+                return NotFoundQueryResult(searchTerm);
             }
 
             return results;
@@ -82,9 +92,28 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
         return DefaultQueryResult();
     }
 
-    public List<Result> Query(Query query) => DefaultQueryResult();
+    private List<Result> ApiKeyErrorQueryResult()
+    {
+        return
+        [
+            new Result
+            {
+                Title = Properties.Resources.plugin_error_api_key,
+                SubTitle = Properties.Resources.plugin_error_api_key_sub,
+                QueryTextDisplay = " ", // Empty string doesn't work
+                IcoPath = _iconPath,
+                Action = _ =>
+                {
+                    // Create a new issue describing the error
+                    var title = HttpUtility.UrlEncode("Bug: Can't get API key");
+                    var body = HttpUtility.UrlEncode($"Exception:\n{_scoop.ApiKeyErrorText}");
+                    return OpenUrlInBrowser(string.Format(CultureInfo.CurrentCulture, RepositoryNewIssueUrl, title, body));
+                },
+            },
+        ];
+    }
 
-    private List<Result> NotFoundResult(string searchTerm)
+    private List<Result> NotFoundQueryResult(string searchTerm)
     {
         var title = string.Format(CultureInfo.CurrentCulture, Properties.Resources.plugin_no_result, searchTerm);
         return
@@ -116,7 +145,7 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
 
     private Result GetResult(Scoop.Package package, string searchTerm)
     {
-        var installed = _scoop.InstalledApps.Contains(package.Name);
+        var installed = _scoop.InstalledPackages.Contains(package.Name);
         var installedSuffix = installed ? "(installed)" : string.Empty;
 
         var faviconUri = new Uri(new Uri(package.Homepage), "/favicon.ico");
@@ -150,19 +179,10 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
             FontFamily = "Segoe Fluent Icons,Segoe MDL2 Assets",
             AcceleratorModifiers = ModifierKeys.Control,
             AcceleratorKey = Key.H,
-            Action = _ =>
-            {
-                if (Helper.OpenInShell(DefaultBrowserInfo.Path, package.Homepage))
-                {
-                    return true;
-                }
-
-                onPluginError(string.Format(CultureInfo.CurrentCulture, Properties.Resources.plugin_homepage_failed, DefaultBrowserInfo.Name ?? DefaultBrowserInfo.MSEdgeName));
-                return false;
-            },
+            Action = _ => OpenUrlInBrowser(package.Homepage),
         });
 
-        if (_scoop.InstalledApps.Contains(package.Name))
+        if (_scoop.InstalledPackages.Contains(package.Name))
         {
             contextResults.Add(new ContextMenuResult
             {
@@ -188,6 +208,17 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
         }
 
         return contextResults;
+    }
+
+    private bool OpenUrlInBrowser(string url)
+    {
+        if (Helper.OpenInShell(DefaultBrowserInfo.Path, url))
+        {
+            return true;
+        }
+
+        onPluginError(string.Format(CultureInfo.CurrentCulture, Properties.Resources.plugin_error_homepage, DefaultBrowserInfo.Name ?? DefaultBrowserInfo.MSEdgeName));
+        return false;
     }
 
     public string GetTranslatedPluginTitle() => Properties.Resources.plugin_name;
