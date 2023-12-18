@@ -36,8 +36,12 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
 
     private static string RepositoryNewIssueUrl => "https://github.com/Quriz/PowerToysRunScoop/issues/new?labels=bug&title={0}&body={1}";
 
-    private Scoop _scoop;
     private Action<string> onPluginError;
+
+    private Scoop _scoop;
+    private bool _initFailed;
+    private Exception _initException;
+
     private PluginInitContext _context;
     private static string _iconPath;
     private bool _disposed;
@@ -52,7 +56,15 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
 
         DefaultBrowserInfo.UpdateIfTimePassed();
 
-        _scoop = new();
+        try
+        {
+            _scoop = new Scoop();
+        }
+        catch (Exception e)
+        {
+            _initFailed = true;
+            _initException = e;
+        }
 
         onPluginError = message =>
         {
@@ -65,9 +77,9 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
 
     public List<Result> Query(Query query, bool delayedExecution)
     {
-        if (_scoop.HasApiKeyError)
+        if (_initFailed)
         {
-            return ApiKeyErrorQueryResult();
+            return InitErrorQueryResult();
         }
 
         if (!delayedExecution || query is null || string.IsNullOrWhiteSpace(query.Search))
@@ -92,21 +104,21 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
         return DefaultQueryResult();
     }
 
-    private List<Result> ApiKeyErrorQueryResult()
+    private List<Result> InitErrorQueryResult()
     {
         return
         [
             new Result
             {
-                Title = Properties.Resources.plugin_error_api_key,
-                SubTitle = Properties.Resources.plugin_error_api_key_sub,
+                Title = Properties.Resources.error_init,
+                SubTitle = Properties.Resources.error_init_sub,
                 QueryTextDisplay = " ", // Empty string doesn't work
                 IcoPath = _iconPath,
                 Action = _ =>
                 {
                     // Create a new issue describing the error
-                    var title = HttpUtility.UrlEncode("Bug: Can't get API key");
-                    var body = HttpUtility.UrlEncode($"Exception:\n{_scoop.ApiKeyErrorText}");
+                    var title = HttpUtility.UrlEncode("Bug: Initialization Failed");
+                    var body = HttpUtility.UrlEncode(_initException.ToString());
                     return OpenUrlInBrowser(string.Format(CultureInfo.CurrentCulture, RepositoryNewIssueUrl, title, body));
                 },
             },
@@ -217,7 +229,7 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
             return true;
         }
 
-        onPluginError(string.Format(CultureInfo.CurrentCulture, Properties.Resources.plugin_error_homepage, DefaultBrowserInfo.Name ?? DefaultBrowserInfo.MSEdgeName));
+        onPluginError(string.Format(CultureInfo.CurrentCulture, Properties.Resources.error_homepage, DefaultBrowserInfo.Name ?? DefaultBrowserInfo.MSEdgeName));
         return false;
     }
 

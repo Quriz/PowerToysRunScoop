@@ -5,13 +5,17 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using Wox.Infrastructure;
+using Wox.Plugin.Logger;
 
 namespace Community.PowerToys.Run.Plugin.Scoop;
 
@@ -19,7 +23,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop;
 
 public partial class Scoop : IDisposable
 {
-    private sealed class ScoopSearchApiPayload
+    private sealed class ApiSearchPayload
     {
         [JsonPropertyName("filter")]
         public string Filter { get; set; }
@@ -46,18 +50,13 @@ public partial class Scoop : IDisposable
         public List<Package> Packages { get; set; }
     }
 
-    public class Package
-    {
-        public string Name { get; set; }
+    public record PackageMetadata(string Repository);
 
-        public string Description { get; set; }
-
-        public string Version { get; set; }
-
-        public string Homepage { get; set; }
-    }
+    public record Package(string Name, string Description, string Version, string Homepage, PackageMetadata Metadata);
 
     private const string ApiSearchUrl = "https://scoopsearch.search.windows.net/indexes/apps/docs/search?api-version=2020-06-30";
+
+    private const string OfficialBucketsUrl = "https://raw.githubusercontent.com/ScoopInstaller/Scoop/master/buckets.json";
 
     private const string WebsiteEnvUrl = "https://raw.githubusercontent.com/ScoopInstaller/scoopinstaller.github.io/main/.env";
 
@@ -68,9 +67,9 @@ public partial class Scoop : IDisposable
     private static partial Regex InstalledAppsFilter();
 
     /// <summary>
-    /// Extract bucket names
+    /// Extract source URLs of installed bucket
     /// </summary>
-    [GeneratedRegex(@"^\s*(\S+)(?=\s+\S+)")]
+    [GeneratedRegex(@"https:\/\/[^\s]+")]
     private static partial Regex InstalledBucketsFilter();
 
     /// <summary>
@@ -80,36 +79,45 @@ public partial class Scoop : IDisposable
     private static partial Regex ApiKeyFilter();
 
     /// <summary>
+    /// Gets a list of all official buckets in name/url pairs
+    /// </summary>
+    public Dictionary<string, string> OfficialBuckets { get; private set; }
+
+    /// <summary>
+    /// Gets a list of all source URLs of installed buckets
+    /// </summary>
+    public HashSet<string> InstalledBucketSourceUrls { get; private set; }
+
+    /// <summary>
     /// Gets a list of all installed packages
     /// </summary>
-    public HashSet<string> InstalledPackages => _installedPackages ??= GetInstalledPackages();
-
-    private HashSet<string> _installedPackages;
+    public HashSet<string> InstalledPackages { get; private set; }
 
     /// <summary>
-    /// Gets a list of all installed buckets
+    /// Gets a value indicating whether this instance is initialized or not
     /// </summary>
-    public HashSet<string> InstalledBuckets => _installedBuckets ??= GetInstalledBuckets();
-
-    private HashSet<string> _installedBuckets;
-
-    /// <summary>
-    /// Gets a value indicating whether there was an error while trying to get the API key or not
-    /// </summary>
-    public bool HasApiKeyError { get; private set; }
-
-    /// <summary>
-    /// Gets the text describing the error
-    /// </summary>
-    public string ApiKeyErrorText { get; private set; }
+    public bool IsInitialized { get; private set; }
 
     private HttpClient _httpClient = new();
     private CancellationTokenSource _searchTokenSource = new();
 
     public Scoop()
     {
-        GetApiKey();
-        GetInstalledPackages();
+        try
+        {
+            GetApiKey();
+            GetOfficialBuckets();
+
+            GetInstalledBuckets();
+            GetInstalledPackages();
+
+            IsInitialized = true;
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Initialization failed: {e.Message}", GetType());
+            throw;
+        }
     }
 
     /// <summary>
@@ -131,20 +139,75 @@ public partial class Scoop : IDisposable
             }
             else
             {
-                HasApiKeyError = true;
-                ApiKeyErrorText = "Regex didn't match.";
+                throw new InvalidOperationException("Regex for API key didn't match.");
             }
         }
         catch (Exception e)
         {
-            HasApiKeyError = true;
-            ApiKeyErrorText = e.Message;
+            // Propagate the exception
+            throw new InvalidOperationException("Failed to get API key.", e);
         }
+    }
+
+    private void GetOfficialBuckets()
+    {
+        try
+        {
+            OfficialBuckets = _httpClient.GetFromJsonAsync<Dictionary<string, string>>(OfficialBucketsUrl).Result;
+        }
+        catch (Exception e)
+        {
+            throw new InvalidOperationException("Failed to get list of official buckets.", e);
+        }
+    }
+
+    private void GetInstalledBuckets()
+    {
+        var output = RunCmdWithOutput("scoop bucket list");
+
+        var matcher = InstalledBucketsFilter();
+        var lines = output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+
+        var buckets = new HashSet<string>();
+
+        // Skip to 3rd line where the app list begins and extract app names
+        for (int i = 2; i < lines.Length; i++)
+        {
+            var match = matcher.Match(lines[i]);
+            if (match.Success)
+            {
+                buckets.Add(match.Groups[1].Value);
+            }
+        }
+
+        InstalledBucketSourceUrls = buckets;
+    }
+
+    private void GetInstalledPackages()
+    {
+        var output = RunCmdWithOutput("scoop list");
+
+        var matcher = InstalledAppsFilter();
+        var lines = output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+
+        var packages = new HashSet<string>();
+
+        // Skip to 4th line where the app list begins and extract app names
+        for (int i = 3; i < lines.Length; i++)
+        {
+            var match = matcher.Match(lines[i]);
+            if (match.Success)
+            {
+                packages.Add(match.Groups[1].Value);
+            }
+        }
+
+        InstalledPackages = packages;
     }
 
     public async Task<List<Package>> SearchPackagesAsync(string query)
     {
-        if (HasApiKeyError)
+        if (!IsInitialized)
         {
             return [];
         }
@@ -156,14 +219,14 @@ public partial class Scoop : IDisposable
             _searchTokenSource.Dispose();
             _searchTokenSource = new CancellationTokenSource();
 
-            var payload = new ScoopSearchApiPayload
+            var payload = new ApiSearchPayload
             {
                 Filter = "Metadata/OfficialRepositoryNumber eq 1 and Metadata/DuplicateOf eq null",
                 OrderBy = "search.score() desc, Metadata/OfficialRepositoryNumber desc, NameSortable asc",
                 Search = query,
                 SearchMode = "all",
-                Select = "Id,Name,Description,Homepage,Version",
-                Top = 5,
+                Select = "Name,Description,Version,Homepage,Metadata/Repository",
+                Top = 6,
             };
 
             var response = await _httpClient.PostAsJsonAsync(ApiSearchUrl, payload, _searchTokenSource.Token);
@@ -181,58 +244,36 @@ public partial class Scoop : IDisposable
         return [];
     }
 
-    private HashSet<string> GetInstalledPackages()
-    {
-        var output = RunScoopCmdWithOutput("list");
-
-        var matcher = InstalledAppsFilter();
-        var lines = output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
-
-        var packages = new HashSet<string>();
-
-        // Skip to 4th line where the app list begins and extract app names
-        for (int i = 3; i < lines.Length; i++)
-        {
-            var match = matcher.Match(lines[i]);
-            if (match.Success)
-            {
-                var packageName = match.Groups[1].Value;
-                packages.Add(packageName);
-            }
-        }
-
-        return packages;
-    }
-
-    private HashSet<string> GetInstalledBuckets()
-    {
-        var output = RunScoopCmdWithOutput("bucket list");
-
-        var matcher = InstalledBucketsFilter();
-        var lines = output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
-
-        var buckets = new HashSet<string>();
-
-        // Skip to 3rd line where the app list begins and extract app names
-        for (int i = 2; i < lines.Length; i++)
-        {
-            var match = matcher.Match(lines[i]);
-            if (match.Success)
-            {
-                buckets.Add(match.Groups[1].Value);
-            }
-        }
-
-        return buckets;
-    }
-
     public bool Install(Package package)
     {
-        var result = RunScoopCmd($"install {package.Name}");
+        // Get bucket name from matching source URL
+        var bucketName = OfficialBuckets.FirstOrDefault(x => x.Value == package.Metadata.Repository).Key;
+
+        var addBucketCommand = $"scoop bucket add {bucketName}";
+        var installPackageCommand = $"scoop install {bucketName}/{package.Name}";
+        var result = false;
+
+        // Check if bucket for this package is already installed or not
+        if (InstalledBucketSourceUrls.Contains(package.Metadata.Repository))
+        {
+            result = OpenCmdWindow(installPackageCommand);
+        }
+        else
+        {
+            // Ask to add bucket
+            var message = string.Format(CultureInfo.CurrentCulture, Properties.Resources.message_add_bucket, bucketName);
+            var choice = MessageBox.Show(message, "Scoop", MessageBoxButton.YesNo);
+            if (choice != MessageBoxResult.Yes)
+            {
+                return false;
+            }
+
+            result = OpenCmdWindow($"{addBucketCommand} && {installPackageCommand}");
+        }
 
         if (result)
         {
-            _installedPackages.Add(package.Name);
+            InstalledPackages.Add(package.Name);
         }
 
         return result;
@@ -240,11 +281,11 @@ public partial class Scoop : IDisposable
 
     public bool Uninstall(Package package)
     {
-        var result = RunScoopCmd($"uninstall {package.Name}");
+        var result = OpenCmdWindow($"scoop uninstall {package.Name}");
 
         if (result)
         {
-            _installedPackages.Remove(package.Name);
+            InstalledPackages.Remove(package.Name);
         }
 
         return result;
@@ -252,19 +293,21 @@ public partial class Scoop : IDisposable
 
     public bool Update(Package package)
     {
-        return RunScoopCmd($"update {package.Name}");
+        return OpenCmdWindow($"scoop update {package.Name}");
     }
 
-    private bool RunScoopCmd(string parameters)
+    private static bool OpenCmdWindow(string command)
     {
-        return Helper.OpenInShell("scoop", $"{parameters} && pause");
+        // Split command into path and arguments by splitting at the first space
+        var cmdSplit = command.Split(new[] { ' ' }, 2);
+        return Helper.OpenInShell(cmdSplit[0], cmdSplit[1] + " && pause");
     }
 
-    private string RunScoopCmdWithOutput(string parameters)
+    private static string RunCmdWithOutput(string command)
     {
         using var process = new Process();
         process.StartInfo.FileName = "cmd";
-        process.StartInfo.Arguments = $"/c scoop {parameters}";
+        process.StartInfo.Arguments = $"/c {command}";
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.CreateNoWindow = true;
         process.StartInfo.RedirectStandardOutput = true;

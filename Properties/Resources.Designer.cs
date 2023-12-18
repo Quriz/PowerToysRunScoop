@@ -87,6 +87,42 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to open {0}..
+        /// </summary>
+        public static string error_homepage {
+            get {
+                return ResourceManager.GetString("error_homepage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to initialize plugin..
+        /// </summary>
+        public static string error_init {
+            get {
+                return ResourceManager.GetString("error_init", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If you believe this is a plugin error, press Enter to open an issue..
+        /// </summary>
+        public static string error_init_sub {
+            get {
+                return ResourceManager.GetString("error_init_sub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To install this package, you need to add the bucket &apos;{0}&apos;. Do you want to continue?.
+        /// </summary>
+        public static string message_add_bucket {
+            get {
+                return ResourceManager.GetString("message_add_bucket", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Scoop package manager integration.
         /// </summary>
         public static string plugin_description {
@@ -101,33 +137,6 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         public static string plugin_description_sub {
             get {
                 return ResourceManager.GetString("plugin_description_sub", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to get API key for search..
-        /// </summary>
-        public static string plugin_error_api_key {
-            get {
-                return ResourceManager.GetString("plugin_error_api_key", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to If you believe this is a plugin error, press Enter to open an issue..
-        /// </summary>
-        public static string plugin_error_api_key_sub {
-            get {
-                return ResourceManager.GetString("plugin_error_api_key_sub", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to open {0}..
-        /// </summary>
-        public static string plugin_error_homepage {
-            get {
-                return ResourceManager.GetString("plugin_error_homepage", resourceCulture);
             }
         }
         
