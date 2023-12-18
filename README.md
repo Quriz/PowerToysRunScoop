@@ -13,9 +13,10 @@ This is a plugin for [PowerToys Run](https://github.com/microsoft/PowerToys/wiki
 
 ## Installation
 
-1. Download the latest release of the plugin from the [releases page](https://github.com/Quriz/PowerToysRunScoop/releases/latest).
-2. Extract the zip file's contents to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins`.
-3. Restart PowerToys.
+1. Make sure you have Scoop installed. If not, get it [here](https://scoop.sh/).
+2. Download the latest release of the plugin from the [releases page](https://github.com/Quriz/PowerToysRunScoop/releases/latest).
+3. Extract the zip file's contents to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins`.
+4. Restart PowerToys.
 
 ## Usage
 
@@ -42,9 +43,8 @@ dotnet sln PowerToys.sln add --solution-folder .\modules\launcher\Plugins .\src\
 4. Clone this repo into the `PowerToys/src/modules/launcher/Plugins` directory.
 5. Open the `PowerToys.sln` solution in Visual Studio.
 6. Add this project to the `PowerToys.sln` solution under the path `PowerToys/src/modules/launcher/Plugins`.
-7. Add the `ApiKey` to the [`Scoop.cs`](https://github.com/Quriz/PowerToysRunScoop/blob/main/Scoop.cs#L61) file. This is the API key used to connect to Scoop's API from [`scoop.sh`](https://scoop.sh/). You can find it there with a bit of dev tools magic.
-8. Build the solution.
-9. Run the `PowerToys` project.
+7. Build the solution.
+8. Run the `PowerToys` project.
 
 # Thanks to
 
