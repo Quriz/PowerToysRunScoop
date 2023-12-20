@@ -61,15 +61,15 @@ public partial class Scoop : IDisposable
     private const string WebsiteEnvUrl = "https://raw.githubusercontent.com/ScoopInstaller/scoopinstaller.github.io/main/.env";
 
     /// <summary>
-    /// Extract app name and ignore if it is a failed install
+    /// Extract package name and ignore if it is a failed install
     /// </summary>
     [GeneratedRegex(@"^\s*(\S+)(?=\s+\S+)(?!.*Install failed)")]
-    private static partial Regex InstalledAppsFilter();
+    private static partial Regex InstalledPackagesFilter();
 
     /// <summary>
     /// Extract source URLs of installed bucket
     /// </summary>
-    [GeneratedRegex(@"https:\/\/[^\s]+")]
+    [GeneratedRegex(@"https://\S+")]
     private static partial Regex InstalledBucketsFilter();
 
     /// <summary>
@@ -176,7 +176,7 @@ public partial class Scoop : IDisposable
             var match = matcher.Match(lines[i]);
             if (match.Success)
             {
-                buckets.Add(match.Groups[1].Value);
+                buckets.Add(match.Value);
             }
         }
 
@@ -187,7 +187,7 @@ public partial class Scoop : IDisposable
     {
         var output = RunCmdWithOutput("scoop list");
 
-        var matcher = InstalledAppsFilter();
+        var matcher = InstalledPackagesFilter();
         var lines = output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
 
         var packages = new HashSet<string>();
@@ -298,9 +298,7 @@ public partial class Scoop : IDisposable
 
     private static bool OpenCmdWindow(string command)
     {
-        // Split command into path and arguments by splitting at the first space
-        var cmdSplit = command.Split(new[] { ' ' }, 2);
-        return Helper.OpenInShell(cmdSplit[0], cmdSplit[1] + " && pause");
+        return Helper.OpenInShell("cmd", $"/c {command} && pause");
     }
 
     private static string RunCmdWithOutput(string command)
