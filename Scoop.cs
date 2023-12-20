@@ -4,11 +4,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -101,7 +103,7 @@ public partial class Scoop : IDisposable
     private HttpClient _httpClient = new();
     private CancellationTokenSource _searchTokenSource = new();
 
-    public Scoop()
+    public void Init()
     {
         try
         {
@@ -253,10 +255,14 @@ public partial class Scoop : IDisposable
         var installPackageCommand = $"scoop install {bucketName}/{package.Name}";
         var result = false;
 
+        // Update the list of installed packages after this package has been installed
+        // We can't add this package directly to the list as we don't know if there was an error during installation or not
+        var onExit = GetInstalledPackages;
+
         // Check if bucket for this package is already installed or not
         if (InstalledBucketSourceUrls.Contains(package.Metadata.Repository))
         {
-            result = OpenCmdWindow(installPackageCommand);
+            result = OpenCmdWindow(installPackageCommand, onExit);
         }
         else
         {
@@ -268,12 +274,7 @@ public partial class Scoop : IDisposable
                 return false;
             }
 
-            result = OpenCmdWindow($"{addBucketCommand} && {installPackageCommand}");
-        }
-
-        if (result)
-        {
-            InstalledPackages.Add(package.Name);
+            result = OpenCmdWindow($"{addBucketCommand} && {installPackageCommand}", onExit);
         }
 
         return result;
@@ -281,14 +282,11 @@ public partial class Scoop : IDisposable
 
     public bool Uninstall(Package package)
     {
-        var result = OpenCmdWindow($"scoop uninstall {package.Name}");
+        // Update the list of installed packages after this package has been uninstalled
+        // We can't remove this package directly from the list as we don't know if there was an error during uninstallation or not
+        var onExit = GetInstalledPackages;
 
-        if (result)
-        {
-            InstalledPackages.Remove(package.Name);
-        }
-
-        return result;
+        return OpenCmdWindow($"scoop uninstall {package.Name}", onExit);
     }
 
     public bool Update(Package package)
@@ -296,9 +294,17 @@ public partial class Scoop : IDisposable
         return OpenCmdWindow($"scoop update {package.Name}");
     }
 
-    private static bool OpenCmdWindow(string command)
+    private static bool OpenCmdWindow(string command, Action onExit = null)
     {
-        return Helper.OpenInShell("cmd", $"/c {command} && pause");
+        // Do not use "using" for process as this will cause the Exited event to not be called
+        // https://stackoverflow.com/a/56582093
+        var process = new Process();
+        process.StartInfo.FileName = "cmd";
+        process.StartInfo.Arguments = $"/c {command} && pause";
+        process.EnableRaisingEvents = true;
+        process.Exited += (_, _) => onExit?.Invoke();
+        process.Start();
+        return true;
     }
 
     private static string RunCmdWithOutput(string command)

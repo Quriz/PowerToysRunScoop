@@ -39,7 +39,6 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
     private Action<string> onPluginError;
 
     private Scoop _scoop;
-    private bool _initFailed;
     private Exception _initException;
 
     private PluginInitContext _context;
@@ -56,28 +55,43 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
 
         DefaultBrowserInfo.UpdateIfTimePassed();
 
-        try
-        {
-            _scoop = new Scoop();
-        }
-        catch (Exception e)
-        {
-            _initFailed = true;
-            _initException = e;
-        }
-
         onPluginError = message =>
         {
             Log.Error(message, GetType());
             _context.API.ShowMsg($"Plugin: {Properties.Resources.plugin_name}", message);
         };
+
+        _scoop = new Scoop();
+        Task.Run(InitScoop);
+    }
+
+    /// <summary>
+    /// Try to initialize Scoop class and retry up to 2 times
+    /// </summary>
+    private async void InitScoop()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            try
+            {
+                _scoop.Init();
+                return;
+            }
+            catch (Exception e)
+            {
+                _initException = e;
+            }
+
+            // Wait 30s before retrying
+            await Task.Delay(30000);
+        }
     }
 
     public List<Result> Query(Query query) => Query(query, false);
 
     public List<Result> Query(Query query, bool delayedExecution)
     {
-        if (_initFailed)
+        if (!_scoop.IsInitialized)
         {
             return InitErrorQueryResult();
         }
