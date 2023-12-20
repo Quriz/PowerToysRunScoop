@@ -49,4 +49,5 @@ dotnet sln PowerToys.sln add --solution-folder .\modules\launcher\Plugins .\src\
 # Thanks to
 
 - [bostrot](https://github.com/bostrot): I used his [PowerToysRunPluginWinget](https://github.com/bostrot/PowerToysRunPluginWinget/tree/main) repository as a base.
-- Microsoft: For creating PowerToys Run!
+- [lukesampson](https://github.com/lukesampson): For creating Scoop!
+- [Microsoft](https://github.com/microsoft): For creating PowerToys Run!
