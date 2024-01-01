@@ -9,5 +9,6 @@
     "Website": "https://github.com/Quriz/PowerToysRunScoop",
     "IcoPathDark": "Images\\scoop.png",
     "IcoPathLight": "Images\\scoop.png",
-    "ExecuteFileName": "Community.PowerToys.Run.Plugin.Scoop.dll"
+    "ExecuteFileName": "Community.PowerToys.Run.Plugin.Scoop.dll",
+    "DynamicLoading": false
 }
