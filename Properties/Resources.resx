@@ -153,4 +153,31 @@
   <data name="message_add_bucket" xml:space="preserve">
     <value>To install this package, you need to add the bucket '{0}'. Do you want to continue?</value>
   </data>
+  <data name="messagebox_yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="messagebox_no" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="package_action_install" xml:space="preserve">
+    <value>Install</value>
+  </data>
+  <data name="package_action_uninstall" xml:space="preserve">
+    <value>Uninstall</value>
+  </data>
+  <data name="package_action_update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="statuswindow_btn_open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="statuswindow_btn_close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="error_scoop_not_installed" xml:space="preserve">
+    <value>Scoop is not installed.</value>
+  </data>
+  <data name="error_scoop_not_installed_sub" xml:space="preserve">
+    <value>Press Enter to open Scoop's homepage.</value>
+  </data>
 </root>

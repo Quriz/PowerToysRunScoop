@@ -9,6 +9,7 @@
         <AssemblyName>Community.PowerToys.Run.Plugin.Scoop</AssemblyName>
         <Version>$(Version).0</Version>
         <useWPF>true</useWPF>
+        <Nullable>enable</Nullable>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
         <GenerateSatelliteAssembliesForCore>true</GenerateSatelliteAssembliesForCore>
@@ -66,6 +67,12 @@
         <None Update="Images\scoop.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <Resource Include="Images\scoop.ico" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <!-- Not really a 3rd party dependency as it is already used by PowerToys Run -->
+        <PackageReference Include="WPF-UI" />
     </ItemGroup>
 
 </Project>

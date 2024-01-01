@@ -114,11 +114,74 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Scoop is not installed..
+        /// </summary>
+        public static string error_scoop_not_installed {
+            get {
+                return ResourceManager.GetString("error_scoop_not_installed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Press Enter to open Scoop&apos;s homepage..
+        /// </summary>
+        public static string error_scoop_not_installed_sub {
+            get {
+                return ResourceManager.GetString("error_scoop_not_installed_sub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to To install this package, you need to add the bucket &apos;{0}&apos;. Do you want to continue?.
         /// </summary>
         public static string message_add_bucket {
             get {
                 return ResourceManager.GetString("message_add_bucket", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No.
+        /// </summary>
+        public static string messagebox_no {
+            get {
+                return ResourceManager.GetString("messagebox_no", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yes.
+        /// </summary>
+        public static string messagebox_yes {
+            get {
+                return ResourceManager.GetString("messagebox_yes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Install.
+        /// </summary>
+        public static string package_action_install {
+            get {
+                return ResourceManager.GetString("package_action_install", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uninstall.
+        /// </summary>
+        public static string package_action_uninstall {
+            get {
+                return ResourceManager.GetString("package_action_uninstall", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update.
+        /// </summary>
+        public static string package_action_update {
+            get {
+                return ResourceManager.GetString("package_action_update", resourceCulture);
             }
         }
         
@@ -164,6 +227,24 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         public static string plugin_no_result_sub {
             get {
                 return ResourceManager.GetString("plugin_no_result_sub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Close.
+        /// </summary>
+        public static string statuswindow_btn_close {
+            get {
+                return ResourceManager.GetString("statuswindow_btn_close", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open.
+        /// </summary>
+        public static string statuswindow_btn_open {
+            get {
+                return ResourceManager.GetString("statuswindow_btn_open", resourceCulture);
             }
         }
     }

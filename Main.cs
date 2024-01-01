@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.Cache;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,15 +35,17 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
 
     public static string PluginID => "be0142a36ee54bd6ab789086d5828b4b";
 
-    private static string RepositoryNewIssueUrl => "https://github.com/Quriz/PowerToysRunScoop/issues/new?labels=bug&title={0}&body={1}";
+    private static readonly CompositeFormat RepositoryNewIssueUrlFormat = CompositeFormat.Parse("https://github.com/Quriz/PowerToysRunScoop/issues/new?labels=bug&title={0}&body={1}");
+    private static readonly CompositeFormat PluginNoResultFormat = CompositeFormat.Parse(Properties.Resources.plugin_no_result);
+    private static readonly CompositeFormat ErrorHomepageFormat = CompositeFormat.Parse(Properties.Resources.error_homepage);
 
-    private Action<string> onPluginError;
+    private Action<string> onPluginError = null!;
 
-    private Scoop _scoop;
-    private Exception _initException;
+    private Scoop _scoop = null!;
+    private Exception _initException = null!;
 
-    private PluginInitContext _context;
-    private static string _iconPath;
+    private PluginInitContext _context = null!;
+    private static string _iconPath = null!;
     private bool _disposed;
 
     public void Init(PluginInitContext context)
@@ -91,6 +94,11 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
 
     public List<Result> Query(Query query, bool delayedExecution)
     {
+        if (!_scoop.IsScoopInstalled)
+        {
+            return ScoopNotInstalledQueryResult();
+        }
+
         if (!_scoop.IsInitialized)
         {
             return InitErrorQueryResult();
@@ -118,6 +126,21 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
         return DefaultQueryResult();
     }
 
+    private List<Result> ScoopNotInstalledQueryResult()
+    {
+        return
+        [
+            new Result
+            {
+                Title = Properties.Resources.error_scoop_not_installed,
+                SubTitle = Properties.Resources.error_scoop_not_installed_sub,
+                QueryTextDisplay = " ", // Empty string doesn't work
+                IcoPath = _iconPath,
+                Action = _ => OpenUrlInBrowser("https://scoop.sh/"),
+            },
+        ];
+    }
+
     private List<Result> InitErrorQueryResult()
     {
         return
@@ -132,8 +155,8 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
                 {
                     // Create a new issue describing the error
                     var title = HttpUtility.UrlEncode("Bug: Initialization Failed");
-                    var body = HttpUtility.UrlEncode(_initException.ToString());
-                    return OpenUrlInBrowser(string.Format(CultureInfo.CurrentCulture, RepositoryNewIssueUrl, title, body));
+                    var body = HttpUtility.UrlEncode(_initException?.ToString());
+                    return OpenUrlInBrowser(string.Format(CultureInfo.CurrentCulture, RepositoryNewIssueUrlFormat, title, body));
                 },
             },
         ];
@@ -141,7 +164,7 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
 
     private List<Result> NotFoundQueryResult(string searchTerm)
     {
-        var title = string.Format(CultureInfo.CurrentCulture, Properties.Resources.plugin_no_result, searchTerm);
+        var title = string.Format(CultureInfo.CurrentCulture, PluginNoResultFormat, searchTerm);
         return
         [
             new Result
@@ -174,8 +197,6 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
         var installed = _scoop.InstalledPackages.Contains(package.Name);
         var installedSuffix = installed ? "(installed)" : string.Empty;
 
-        var faviconUri = new Uri(new Uri(package.Homepage), "/favicon.ico");
-
         return new Result
         {
             ContextData = package,
@@ -183,8 +204,12 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
             TitleHighlightData = StringMatcher.FuzzySearch(searchTerm, package.Name).MatchData,
             SubTitle = package.Description,
             QueryTextDisplay = package.Name,
-            Icon = () => new BitmapImage(faviconUri),
-            Action = _ => _scoop.Install(package),
+            Icon = () => new BitmapImage(package.GetFaviconUri()),
+            Action = _ =>
+            {
+                _scoop.Install(package);
+                return true;
+            },
         };
     }
 
@@ -218,7 +243,11 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
                 FontFamily = "Segoe Fluent Icons,Segoe MDL2 Assets",
                 AcceleratorModifiers = ModifierKeys.Control,
                 AcceleratorKey = Key.U,
-                Action = _ => _scoop.Update(package),
+                Action = _ =>
+                {
+                    _scoop.Update(package);
+                    return true;
+                },
             });
 
             contextResults.Add(new ContextMenuResult
@@ -229,7 +258,11 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
                 FontFamily = "Segoe Fluent Icons,Segoe MDL2 Assets",
                 AcceleratorModifiers = ModifierKeys.Control,
                 AcceleratorKey = Key.D,
-                Action = _ => _scoop.Uninstall(package),
+                Action = _ =>
+                {
+                    _scoop.Uninstall(package);
+                    return true;
+                },
             });
         }
 
@@ -238,12 +271,12 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
 
     private bool OpenUrlInBrowser(string url)
     {
-        if (Helper.OpenInShell(DefaultBrowserInfo.Path, url))
+        if (Wox.Infrastructure.Helper.OpenInShell(DefaultBrowserInfo.Path, url))
         {
             return true;
         }
 
-        onPluginError(string.Format(CultureInfo.CurrentCulture, Properties.Resources.error_homepage, DefaultBrowserInfo.Name ?? DefaultBrowserInfo.MSEdgeName));
+        onPluginError(string.Format(CultureInfo.CurrentCulture, ErrorHomepageFormat, DefaultBrowserInfo.Name ?? DefaultBrowserInfo.MSEdgeName));
         return false;
     }
 

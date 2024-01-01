@@ -4,20 +4,22 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Reflection;
+using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Wox.Infrastructure;
+using System.Windows.Media;
 using Wox.Plugin.Logger;
+using MessageBoxResult = Wpf.Ui.Controls.MessageBoxResult;
 
 namespace Community.PowerToys.Run.Plugin.Scoop;
 
@@ -28,19 +30,19 @@ public partial class Scoop : IDisposable
     private sealed class ApiSearchPayload
     {
         [JsonPropertyName("filter")]
-        public string Filter { get; set; }
+        public required string Filter { get; set; }
 
         [JsonPropertyName("orderby")]
-        public string OrderBy { get; set; }
+        public required string OrderBy { get; set; }
 
         [JsonPropertyName("search")]
-        public string Search { get; set; }
+        public required string Search { get; set; }
 
         [JsonPropertyName("searchMode")]
-        public string SearchMode { get; set; }
+        public required string SearchMode { get; set; }
 
         [JsonPropertyName("select")]
-        public string Select { get; set; }
+        public required string Select { get; set; }
 
         [JsonPropertyName("top")]
         public int Top { get; set; }
@@ -49,18 +51,27 @@ public partial class Scoop : IDisposable
     private sealed class SearchApiResponse
     {
         [JsonPropertyName("value")]
-        public List<Package> Packages { get; set; }
+        public required List<Package> Packages { get; set; }
     }
 
-    public record PackageMetadata(string Repository);
+    public record PackageMetadata(string Repository, string FilePath);
 
     public record Package(string Name, string Description, string Version, string Homepage, PackageMetadata Metadata);
+
+    public enum PackageAction
+    {
+        Install,
+        Uninstall,
+        Update,
+    }
 
     private const string ApiSearchUrl = "https://scoopsearch.search.windows.net/indexes/apps/docs/search?api-version=2020-06-30";
 
     private const string OfficialBucketsUrl = "https://raw.githubusercontent.com/ScoopInstaller/Scoop/master/buckets.json";
 
     private const string WebsiteEnvUrl = "https://raw.githubusercontent.com/ScoopInstaller/scoopinstaller.github.io/main/.env";
+
+    private static readonly CompositeFormat MessageAddBucketFormat = CompositeFormat.Parse(Properties.Resources.message_add_bucket);
 
     /// <summary>
     /// Extract package name and ignore if it is a failed install
@@ -81,32 +92,43 @@ public partial class Scoop : IDisposable
     private static partial Regex ApiKeyFilter();
 
     /// <summary>
-    /// Gets a list of all official buckets in name/url pairs
+    /// Gets or sets a list of all official buckets in name/url pairs
     /// </summary>
-    public Dictionary<string, string> OfficialBuckets { get; private set; }
+    private Dictionary<string, string> OfficialBuckets { get; set; } = [];
 
     /// <summary>
-    /// Gets a list of all source URLs of installed buckets
+    /// Gets or sets a list of all source URLs of installed buckets
     /// </summary>
-    public HashSet<string> InstalledBucketSourceUrls { get; private set; }
+    private HashSet<string> InstalledBucketSourceUrls { get; set; } = [];
 
     /// <summary>
     /// Gets a list of all installed packages
     /// </summary>
-    public HashSet<string> InstalledPackages { get; private set; }
+    public HashSet<string> InstalledPackages { get; private set; } = [];
 
     /// <summary>
     /// Gets a value indicating whether this instance is initialized or not
     /// </summary>
     public bool IsInitialized { get; private set; }
 
-    private HttpClient _httpClient = new();
+    /// <summary>
+    /// Gets a value indicating whether scoop is installed or not
+    /// </summary>
+    public bool IsScoopInstalled { get; private set; }
+
+    private readonly HttpClient _httpClient = new();
     private CancellationTokenSource _searchTokenSource = new();
 
     public void Init()
     {
         try
         {
+            CheckIfScoopInstalled();
+            if (!IsScoopInstalled)
+            {
+                return;
+            }
+
             GetApiKey();
             GetOfficialBuckets();
 
@@ -120,6 +142,22 @@ public partial class Scoop : IDisposable
             Log.Error($"Initialization failed: {e.Message}", GetType());
             throw;
         }
+    }
+
+    /// <summary>
+    /// Checks if scoop is installed
+    /// </summary>
+    private void CheckIfScoopInstalled()
+    {
+        using var process = new Process();
+        process.StartInfo.FileName = "cmd.exe";
+        process.StartInfo.Arguments = "/c scoop -v";
+        process.StartInfo.CreateNoWindow = true;
+
+        process.Start();
+        process.WaitForExit();
+
+        IsScoopInstalled = process.ExitCode == 0;
     }
 
     /// <summary>
@@ -155,7 +193,7 @@ public partial class Scoop : IDisposable
     {
         try
         {
-            OfficialBuckets = _httpClient.GetFromJsonAsync<Dictionary<string, string>>(OfficialBucketsUrl).Result;
+            OfficialBuckets = _httpClient.GetFromJsonAsync<Dictionary<string, string>>(OfficialBucketsUrl).Result!;
         }
         catch (Exception e)
         {
@@ -165,7 +203,11 @@ public partial class Scoop : IDisposable
 
     private void GetInstalledBuckets()
     {
-        var output = RunCmdWithOutput("scoop bucket list");
+        if (!Helper.RunCmdWithOutput("scoop bucket list", out var output))
+        {
+            InstalledBucketSourceUrls = [];
+            return;
+        }
 
         var matcher = InstalledBucketsFilter();
         var lines = output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
@@ -187,7 +229,11 @@ public partial class Scoop : IDisposable
 
     private void GetInstalledPackages()
     {
-        var output = RunCmdWithOutput("scoop list");
+        if (!Helper.RunCmdWithOutput("scoop list", out var output))
+        {
+            InstalledPackages = [];
+            return;
+        }
 
         var matcher = InstalledPackagesFilter();
         var lines = output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
@@ -216,18 +262,19 @@ public partial class Scoop : IDisposable
 
         try
         {
-            // Cancel previous search request
+            // Cancel previous search request and create new token for this request
             _searchTokenSource.Cancel();
             _searchTokenSource.Dispose();
             _searchTokenSource = new CancellationTokenSource();
 
+            // Search for query via API
             var payload = new ApiSearchPayload
             {
                 Filter = "Metadata/OfficialRepositoryNumber eq 1 and Metadata/DuplicateOf eq null",
                 OrderBy = "search.score() desc, Metadata/OfficialRepositoryNumber desc, NameSortable asc",
                 Search = query,
                 SearchMode = "all",
-                Select = "Name,Description,Version,Homepage,Metadata/Repository",
+                Select = "Name,Description,Version,Homepage,Metadata/Repository,Metadata/FilePath",
                 Top = 6,
             };
 
@@ -235,10 +282,10 @@ public partial class Scoop : IDisposable
             if (response.IsSuccessStatusCode)
             {
                 var apiResponse = await response.Content.ReadFromJsonAsync<SearchApiResponse>(_searchTokenSource.Token);
-                return apiResponse.Packages;
+                return apiResponse!.Packages;
             }
         }
-        catch (Exception)
+        catch
         {
             // do nothing
         }
@@ -246,80 +293,223 @@ public partial class Scoop : IDisposable
         return [];
     }
 
-    public bool Install(Package package)
+    /// <summary>
+    /// Install the given package
+    /// </summary>
+    /// <param name="package">The package to install</param>
+    public void Install(Package package)
     {
         // Get bucket name from matching source URL
         var bucketName = OfficialBuckets.FirstOrDefault(x => x.Value == package.Metadata.Repository).Key;
 
         var addBucketCommand = $"scoop bucket add {bucketName}";
         var installPackageCommand = $"scoop install {bucketName}/{package.Name}";
-        var result = false;
-
-        // Update the list of installed packages after this package has been installed
-        // We can't add this package directly to the list as we don't know if there was an error during installation or not
-        var onExit = GetInstalledPackages;
 
         // Check if bucket for this package is already installed or not
         if (InstalledBucketSourceUrls.Contains(package.Metadata.Repository))
         {
-            result = OpenCmdWindow(installPackageCommand, onExit);
+            RunCmdInStatusWindow(installPackageCommand, package, PackageAction.Install, OnExit);
         }
         else
         {
             // Ask to add bucket
-            var message = string.Format(CultureInfo.CurrentCulture, Properties.Resources.message_add_bucket, bucketName);
-            var choice = MessageBox.Show(message, "Scoop", MessageBoxButton.YesNo);
-            if (choice != MessageBoxResult.Yes)
+            var choice = Helper.ShowMessageBoxYesNo("PowerToys Run: Scoop", string.Format(CultureInfo.CurrentCulture, MessageAddBucketFormat, bucketName));
+            if (choice != MessageBoxResult.Primary)
             {
-                return false;
+                return;
             }
 
-            result = OpenCmdWindow($"{addBucketCommand} && {installPackageCommand}", onExit);
+            RunCmdInStatusWindow($"{addBucketCommand} && {installPackageCommand}", package, PackageAction.Install, OnExit);
         }
 
-        return result;
+        void OnExit(bool success)
+        {
+            if (success)
+            {
+                InstalledPackages.Add(package.Name);
+            }
+        }
     }
 
-    public bool Uninstall(Package package)
+    /// <summary>
+    /// Uninstall the given package
+    /// </summary>
+    /// <param name="package">The package to uninstall</param>
+    public void Uninstall(Package package)
     {
-        // Update the list of installed packages after this package has been uninstalled
-        // We can't remove this package directly from the list as we don't know if there was an error during uninstallation or not
-        var onExit = GetInstalledPackages;
+        RunCmdInStatusWindow($"scoop uninstall {package.Name}", package, PackageAction.Uninstall, OnExit);
 
-        return OpenCmdWindow($"scoop uninstall {package.Name}", onExit);
+        void OnExit(bool success)
+        {
+            if (success)
+            {
+                InstalledPackages.Remove(package.Name);
+            }
+        }
     }
 
-    public bool Update(Package package)
+    /// <summary>
+    /// Update the given package
+    /// </summary>
+    /// <param name="package">The package to update</param>
+    public void Update(Package package)
     {
-        return OpenCmdWindow($"scoop update {package.Name}");
+        RunCmdInStatusWindow($"scoop update {package.Name}", package, PackageAction.Update, null);
     }
 
-    private static bool OpenCmdWindow(string command, Action onExit = null)
-    {
-        // Do not use "using" for process as this will cause the Exited event to not be called
-        // https://stackoverflow.com/a/56582093
-        var process = new Process();
-        process.StartInfo.FileName = "cmd";
-        process.StartInfo.Arguments = $"/c {command} && pause";
-        process.EnableRaisingEvents = true;
-        process.Exited += (_, _) => onExit?.Invoke();
-        process.Start();
-        return true;
-    }
+    /// <summary>
+    /// Run a install/uninstall/update command and show a window updating it's progress
+    /// </summary>
+    /// <param name="command">The command to execute in background</param>
+    /// <param name="package">The package that gets installed/uninstalled/updated</param>
+    /// <param name="action">Specifies which action the command executes (install/uninstall/update)</param>
+    /// <param name="onExit">Event that gets called at the end with a boolean if the action was successful</param>
+    private void RunCmdInStatusWindow(string command, Package package, PackageAction action, Action<bool>? onExit)
+        => Application.Current.Dispatcher.Invoke(async () =>
+        {
+            // Get shortcut path to be able to open program after install or update
+            // Ignore for uninstall action
+            var shortcutPath = action switch
+            {
+                PackageAction.Install or PackageAction.Update => await GetShortcutPath(package),
+                _ => null,
+            };
 
-    private static string RunCmdWithOutput(string command)
-    {
-        using var process = new Process();
-        process.StartInfo.FileName = "cmd";
-        process.StartInfo.Arguments = $"/c {command}";
-        process.StartInfo.UseShellExecute = false;
-        process.StartInfo.CreateNoWindow = true;
-        process.StartInfo.RedirectStandardOutput = true;
-        process.Start();
+            // Create window
+            var window = new StatusWindow(package, action, shortcutPath);
+            window.Show();
+            window.Activate();
 
-        var output = process.StandardOutput.ReadToEnd();
-        process.WaitForExit();
-        return output;
+            var fullLog = string.Empty;
+            var currentLine = string.Empty;
+            var currentProgress = -1;
+
+            // Run command
+            await Helper.RunCmdWithOutputCallback(command, OnCharRead);
+
+            // Hide progress bar if command exited before starting action
+            if (currentProgress == -1)
+            {
+                window.ProgressBarVisible = false;
+            }
+
+            window.Progress = 100;
+
+            var finishedSuccessfully = currentProgress == 100;
+            var hasError = !finishedSuccessfully && fullLog.Contains("ERROR");
+
+            // Enable Button on success & warn but not on error
+            if (!hasError && shortcutPath != null)
+            {
+                window.OpenButtonEnabled = true;
+            }
+
+            // Close the window in 30s if action was successful
+            if (finishedSuccessfully)
+            {
+                window.AutoCloseIn30s();
+
+                window.ProgressBarColor = Brushes.Green;
+            }
+            else
+            {
+                // Show the full log if there was a warning or error
+                window.Status = fullLog.TrimEnd();
+                window.StatusText.TextWrapping = TextWrapping.Wrap;
+
+                if (hasError)
+                {
+                    window.ProgressBarColor = Brushes.Red;
+                }
+            }
+
+            onExit?.Invoke(finishedSuccessfully);
+            return;
+
+            // Process output live for every character
+            void OnCharRead(char character)
+            {
+                fullLog += character;
+                currentLine += character;
+
+                // Detect line end
+                if (character == '\n')
+                {
+                    OnLineRead(currentLine.TrimEnd());
+                    currentLine = string.Empty;
+                }
+
+                if (string.IsNullOrWhiteSpace(currentLine) || currentLine.StartsWith(" *", StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                // Display current line
+                window.Status = currentLine.TrimEnd();
+            }
+
+            // Process output line by line
+            void OnLineRead(string line)
+            {
+                // Approximate progress from line
+                var progress = line switch
+                {
+                    not null when line.StartsWith("Installing", StringComparison.Ordinal) => 10,
+                    not null when line.StartsWith("Uninstalling", StringComparison.Ordinal) => 10,
+                    not null when line.StartsWith("Updating one", StringComparison.Ordinal) => 10,
+                    not null when line.StartsWith("Downloading", StringComparison.Ordinal) => 20,
+                    not null when line.StartsWith("Loading", StringComparison.Ordinal) => 20,
+                    not null when line.StartsWith("Checking hash", StringComparison.Ordinal) => 40,
+                    not null when line.StartsWith("Extracting", StringComparison.Ordinal) => 50,
+                    not null when line.StartsWith("Linking", StringComparison.Ordinal) => 90,
+                    not null when line.EndsWith("installed successfully!", StringComparison.Ordinal) => 100,
+                    not null when line.EndsWith("was uninstalled.", StringComparison.Ordinal) => 100,
+                    not null when line.StartsWith("Latest versions for all apps are installed!", StringComparison.Ordinal) => 100,
+                    _ => currentProgress,
+                };
+
+                // Let the progress only go higher
+                currentProgress = Math.Max(currentProgress, progress);
+
+                window.Progress = currentProgress;
+            }
+        });
+
+    /// <summary>
+    /// Extracts first shortcut name from the package manifest (via web request) and builds the according shortcut path
+    /// </summary>
+    /// <param name="package">The package to get the shortcut for</param>
+    /// <returns>The path of the shortcut file</returns>
+    private async Task<string?> GetShortcutPath(Package package)
+    {
+        try
+        {
+            // Get manifest
+            var repositoryUrl = package.Metadata.Repository.Replace("github.com", "raw.githubusercontent.com");
+            var manifestUrl = $"{repositoryUrl}/master/{package.Metadata.FilePath}";
+            var jsonString = await _httpClient.GetStringAsync(manifestUrl);
+
+            var jsonDocument = JsonDocument.Parse(jsonString);
+            var root = jsonDocument.RootElement;
+
+            // Get shortcuts
+            if (root.TryGetProperty("shortcuts", out var shortcutsElement))
+            {
+                foreach (var shortcutElement in shortcutsElement.EnumerateArray().Where(shortcutElement => shortcutElement.GetArrayLength() == 2))
+                {
+                    // Get shortcut name and build file path
+                    var shortcutName = shortcutElement[1].GetString();
+                    var startMenu = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+                    return Path.Combine(startMenu, "Programs", "Scoop Apps", $"{shortcutName}.lnk");
+                }
+            }
+        }
+        catch
+        {
+            // do nothing
+        }
+
+        return null;
     }
 
     public void Dispose()
