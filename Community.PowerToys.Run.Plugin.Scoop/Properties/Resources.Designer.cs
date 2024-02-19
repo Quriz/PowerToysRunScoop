@@ -21,7 +21,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -35,7 +35,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Community.PowerToys.Run.Plugin.Scoop.Properties.Resources", typeof(Resources).Assembly);
@@ -50,7 +50,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -62,7 +62,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Open homepage (Ctrl+H).
         /// </summary>
-        internal static string context_menu_homepage {
+        public static string context_menu_homepage {
             get {
                 return ResourceManager.GetString("context_menu_homepage", resourceCulture);
             }
@@ -71,7 +71,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Uninstall (Ctrl+D).
         /// </summary>
-        internal static string context_menu_uninstall {
+        public static string context_menu_uninstall {
             get {
                 return ResourceManager.GetString("context_menu_uninstall", resourceCulture);
             }
@@ -80,7 +80,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Update (Ctrl+U).
         /// </summary>
-        internal static string context_menu_update {
+        public static string context_menu_update {
             get {
                 return ResourceManager.GetString("context_menu_update", resourceCulture);
             }
@@ -89,7 +89,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Failed to open {0}..
         /// </summary>
-        internal static string error_homepage {
+        public static string error_homepage {
             get {
                 return ResourceManager.GetString("error_homepage", resourceCulture);
             }
@@ -98,7 +98,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Failed to initialize plugin..
         /// </summary>
-        internal static string error_init {
+        public static string error_init {
             get {
                 return ResourceManager.GetString("error_init", resourceCulture);
             }
@@ -107,7 +107,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to If you believe this is a plugin error, press Enter to open an issue..
         /// </summary>
-        internal static string error_init_sub {
+        public static string error_init_sub {
             get {
                 return ResourceManager.GetString("error_init_sub", resourceCulture);
             }
@@ -116,7 +116,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Scoop is not installed..
         /// </summary>
-        internal static string error_scoop_not_installed {
+        public static string error_scoop_not_installed {
             get {
                 return ResourceManager.GetString("error_scoop_not_installed", resourceCulture);
             }
@@ -125,7 +125,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Press Enter to open Scoop&apos;s homepage..
         /// </summary>
-        internal static string error_scoop_not_installed_sub {
+        public static string error_scoop_not_installed_sub {
             get {
                 return ResourceManager.GetString("error_scoop_not_installed_sub", resourceCulture);
             }
@@ -134,7 +134,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to To install this package, you need to add the bucket &apos;{0}&apos;. Do you want to continue?.
         /// </summary>
-        internal static string message_add_bucket {
+        public static string message_add_bucket {
             get {
                 return ResourceManager.GetString("message_add_bucket", resourceCulture);
             }
@@ -143,7 +143,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; is already installed. Do you want to update it instead?.
         /// </summary>
-        internal static string message_update_instead {
+        public static string message_update_instead {
             get {
                 return ResourceManager.GetString("message_update_instead", resourceCulture);
             }
@@ -152,7 +152,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to No.
         /// </summary>
-        internal static string messagebox_no {
+        public static string messagebox_no {
             get {
                 return ResourceManager.GetString("messagebox_no", resourceCulture);
             }
@@ -161,7 +161,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Yes.
         /// </summary>
-        internal static string messagebox_yes {
+        public static string messagebox_yes {
             get {
                 return ResourceManager.GetString("messagebox_yes", resourceCulture);
             }
@@ -170,7 +170,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Install.
         /// </summary>
-        internal static string package_action_install {
+        public static string package_action_install {
             get {
                 return ResourceManager.GetString("package_action_install", resourceCulture);
             }
@@ -179,7 +179,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Uninstall.
         /// </summary>
-        internal static string package_action_uninstall {
+        public static string package_action_uninstall {
             get {
                 return ResourceManager.GetString("package_action_uninstall", resourceCulture);
             }
@@ -188,7 +188,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Update.
         /// </summary>
-        internal static string package_action_update {
+        public static string package_action_update {
             get {
                 return ResourceManager.GetString("package_action_update", resourceCulture);
             }
@@ -197,7 +197,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Scoop package manager integration.
         /// </summary>
-        internal static string plugin_description {
+        public static string plugin_description {
             get {
                 return ResourceManager.GetString("plugin_description", resourceCulture);
             }
@@ -206,7 +206,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Search, install, update, and uninstall Scoop packages..
         /// </summary>
-        internal static string plugin_description_sub {
+        public static string plugin_description_sub {
             get {
                 return ResourceManager.GetString("plugin_description_sub", resourceCulture);
             }
@@ -215,7 +215,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Scoop.
         /// </summary>
-        internal static string plugin_name {
+        public static string plugin_name {
             get {
                 return ResourceManager.GetString("plugin_name", resourceCulture);
             }
@@ -224,7 +224,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to No result found for &apos;{0}&apos;..
         /// </summary>
-        internal static string plugin_no_result {
+        public static string plugin_no_result {
             get {
                 return ResourceManager.GetString("plugin_no_result", resourceCulture);
             }
@@ -233,7 +233,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Maybe try something different..
         /// </summary>
-        internal static string plugin_no_result_sub {
+        public static string plugin_no_result_sub {
             get {
                 return ResourceManager.GetString("plugin_no_result_sub", resourceCulture);
             }
@@ -242,7 +242,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Close.
         /// </summary>
-        internal static string statuswindow_btn_close {
+        public static string statuswindow_btn_close {
             get {
                 return ResourceManager.GetString("statuswindow_btn_close", resourceCulture);
             }
@@ -251,7 +251,7 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Open.
         /// </summary>
-        internal static string statuswindow_btn_open {
+        public static string statuswindow_btn_open {
             get {
                 return ResourceManager.GetString("statuswindow_btn_open", resourceCulture);
             }
