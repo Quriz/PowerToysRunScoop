@@ -22,17 +22,16 @@ public static class Helper
     }
 
     /// <summary>
-    /// Open a WPF UI MessageBox with Yes/No
+    /// Opens a WPF UI MessageBox with Yes/No buttons
     /// </summary>
-    /// <param name="title">The title of the MessageBox window</param>
     /// <param name="message">The message to show</param>
     /// <returns>Which button was clicked</returns>
-    public static Wpf.Ui.Controls.MessageBoxResult ShowMessageBoxYesNo(string title, string message)
+    public static Wpf.Ui.Controls.MessageBoxResult ShowMessageBoxYesNo(string message)
         => Application.Current.Dispatcher.Invoke(() =>
         {
             var uiMessageBox = new Wpf.Ui.Controls.MessageBox
             {
-                Title = title,
+                Title = "PowerToys Run: Scoop",
                 Content = message,
                 PrimaryButtonText = Properties.Resources.messagebox_yes,
                 CloseButtonText = Properties.Resources.messagebox_no,

@@ -72,6 +72,7 @@ public partial class Scoop : IDisposable
     private const string WebsiteEnvUrl = "https://raw.githubusercontent.com/ScoopInstaller/scoopinstaller.github.io/main/.env";
 
     private static readonly CompositeFormat MessageAddBucketFormat = CompositeFormat.Parse(Properties.Resources.message_add_bucket);
+    private static readonly CompositeFormat MessageUpdateInstead = CompositeFormat.Parse(Properties.Resources.message_update_instead);
 
     /// <summary>
     /// Extract package name and ignore if it is a failed install
@@ -308,19 +309,31 @@ public partial class Scoop : IDisposable
         // Check if bucket for this package is already installed or not
         if (InstalledBucketSourceUrls.Contains(package.Metadata.Repository))
         {
-            RunCmdInStatusWindow(installPackageCommand, package, PackageAction.Install, OnExit);
+            // Ask to update package if it is already installed
+            if (InstalledPackages.Contains(package.Name))
+            {
+                var choice = Helper.ShowMessageBoxYesNo(string.Format(CultureInfo.CurrentCulture, MessageUpdateInstead, package.Name));
+                if (choice == MessageBoxResult.Primary)
+                {
+                    Update(package);
+                }
+            }
+            else
+            {
+                RunCmdInStatusWindow(installPackageCommand, package, PackageAction.Install, OnExit);
+            }
         }
         else
         {
             // Ask to add bucket
-            var choice = Helper.ShowMessageBoxYesNo("PowerToys Run: Scoop", string.Format(CultureInfo.CurrentCulture, MessageAddBucketFormat, bucketName));
-            if (choice != MessageBoxResult.Primary)
+            var choice = Helper.ShowMessageBoxYesNo(string.Format(CultureInfo.CurrentCulture, MessageAddBucketFormat, bucketName));
+            if (choice == MessageBoxResult.Primary)
             {
-                return;
+                RunCmdInStatusWindow($"{addBucketCommand} && {installPackageCommand}", package, PackageAction.Install, OnExit);
             }
-
-            RunCmdInStatusWindow($"{addBucketCommand} && {installPackageCommand}", package, PackageAction.Install, OnExit);
         }
+        
+        return;
 
         void OnExit(bool success)
         {

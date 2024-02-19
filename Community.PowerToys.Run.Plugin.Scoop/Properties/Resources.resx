@@ -180,4 +180,7 @@
   <data name="error_scoop_not_installed_sub" xml:space="preserve">
     <value>Press Enter to open Scoop's homepage.</value>
   </data>
+  <data name="message_update_instead" xml:space="preserve">
+    <value>'{0}' is already installed. Do you want to update it instead?</value>
+  </data>
 </root>
