@@ -429,28 +429,35 @@ public partial class Scoop : IDisposable
             // Process output live for every character
             void OnCharRead(char character)
             {
-                fullLog += character;
                 currentLine += character;
 
                 // Detect line end
                 if (character == '\n')
                 {
-                    OnLineRead(currentLine.TrimEnd());
+                    var line = currentLine.TrimEnd();
                     currentLine = string.Empty;
+                    
+                    // Cancel if line is a bucket update entry 
+                    if (line.StartsWith(" *", StringComparison.Ordinal))
+                    {
+                        return;
+                    }
+                    
+                    OnLineRead(line);
                 }
 
-                if (string.IsNullOrWhiteSpace(currentLine) || currentLine.StartsWith(" *", StringComparison.Ordinal))
+                // Display current line if not empty
+                if (!string.IsNullOrWhiteSpace(currentLine))
                 {
-                    return;
+                    window.Status = currentLine.TrimEnd();
                 }
-
-                // Display current line
-                window.Status = currentLine.TrimEnd();
             }
 
             // Process output line by line
             void OnLineRead(string line)
             {
+                fullLog += line + '\n';
+                
                 // Approximate progress from line
                 var progress = line switch
                 {
