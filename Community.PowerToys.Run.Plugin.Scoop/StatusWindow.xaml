@@ -86,7 +86,7 @@
                     Appearance="Tertiary"/>
             
                 <!-- Status Progress Bar-->
-                <ProgressBar x:Name="StatusProgressBar" IsIndeterminate="True" Margin="0, 8" />
+                <ProgressBar x:Name="StatusProgressBar" IsIndeterminate="True" Margin="0,8,0,0" />
             </StackPanel>
         </Grid>
         

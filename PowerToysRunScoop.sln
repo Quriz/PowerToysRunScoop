@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Community.PowerToys.Run.Plugin.Scoop", "Community.PowerToys.Run.Plugin.Scoop\Community.PowerToys.Run.Plugin.Scoop.csproj", "{BAAF8557-9FF6-4641-A4B5-2752E3834CE2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM64 = Debug|ARM64
+		Debug|x64 = Debug|x64
+		Release|ARM64 = Release|ARM64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BAAF8557-9FF6-4641-A4B5-2752E3834CE2}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{BAAF8557-9FF6-4641-A4B5-2752E3834CE2}.Debug|ARM64.Build.0 = Debug|ARM64
+		{BAAF8557-9FF6-4641-A4B5-2752E3834CE2}.Debug|x64.ActiveCfg = Debug|x64
+		{BAAF8557-9FF6-4641-A4B5-2752E3834CE2}.Debug|x64.Build.0 = Debug|x64
+		{BAAF8557-9FF6-4641-A4B5-2752E3834CE2}.Release|ARM64.ActiveCfg = Release|ARM64
+		{BAAF8557-9FF6-4641-A4B5-2752E3834CE2}.Release|ARM64.Build.0 = Release|ARM64
+		{BAAF8557-9FF6-4641-A4B5-2752E3834CE2}.Release|x64.ActiveCfg = Release|x64
+		{BAAF8557-9FF6-4641-A4B5-2752E3834CE2}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {42C25A47-2F50-4F7A-AE06-F953E9AABB90}
+	EndGlobalSection
+EndGlobal
