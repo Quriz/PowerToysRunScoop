@@ -6,8 +6,8 @@ $assembly = "Community.PowerToys.Run.Plugin.$name"
 $version = "v$((Get-Content ./plugin.json | ConvertFrom-Json).Version)"
 $archs = @('x64', 'arm64')
 
-git tag $version
-git push --tags
+#git tag $version
+#git push --tags
 
 Remove-Item ./out/*.zip -Recurse -Force -ErrorAction Ignore
 foreach ($arch in $archs) {
