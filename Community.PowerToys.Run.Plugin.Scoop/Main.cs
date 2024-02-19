@@ -69,11 +69,11 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
     }
 
     /// <summary>
-    /// Try to initialize Scoop class and retry up to 2 times
+    /// Try to initialize Scoop class and retry a few times on error
     /// </summary>
     private async void InitScoop()
     {
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 7; i++)
         {
             try
             {
