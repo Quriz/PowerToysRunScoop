@@ -15,7 +15,7 @@
     Height="185"
     SizeToContent="Height"
     ResizeMode="NoResize"
-    ExtendsContentIntoTitleBar="False"
+    ExtendsContentIntoTitleBar="True"
     WindowStyle="SingleBorderWindow"
     WindowStartupLocation="CenterScreen"
     ShowInTaskbar="True"
