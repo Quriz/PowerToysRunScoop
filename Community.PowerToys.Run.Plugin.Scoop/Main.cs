@@ -43,10 +43,12 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
 
     private Scoop _scoop = null!;
     private Exception _initException = null!;
+    private bool _isInitializing = false;
 
     private PluginInitContext _context = null!;
     private static string _iconPath = null!;
     private bool _disposed;
+    
 
     public void Init(PluginInitContext context)
     {
@@ -73,6 +75,11 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
     /// </summary>
     private async void InitScoop()
     {
+        if (_isInitializing)
+            return;
+        
+        _isInitializing = true;
+        
         for (int i = 0; i < 7; i++)
         {
             try
@@ -88,6 +95,8 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
             // Wait 30s before retrying
             await Task.Delay(30000);
         }
+        
+        _isInitializing = false;
     }
 
     public List<Result> Query(Query query) => Query(query, false);
@@ -101,6 +110,7 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
 
         if (!_scoop.IsInitialized)
         {
+            Task.Run(InitScoop);
             return InitErrorQueryResult();
         }
 
