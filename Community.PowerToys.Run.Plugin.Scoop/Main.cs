@@ -35,14 +35,12 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
 
     public static string PluginID => "be0142a36ee54bd6ab789086d5828b4b";
 
-    private static readonly CompositeFormat RepositoryNewIssueUrlFormat = CompositeFormat.Parse("https://github.com/Quriz/PowerToysRunScoop/issues/new?labels=bug&title={0}&body={1}");
     private static readonly CompositeFormat PluginNoResultFormat = CompositeFormat.Parse(Properties.Resources.plugin_no_result);
     private static readonly CompositeFormat ErrorHomepageFormat = CompositeFormat.Parse(Properties.Resources.error_homepage);
 
     private Action<string> onPluginError = null!;
 
     private Scoop _scoop = null!;
-    private Exception _initException = null!;
     private bool _isInitializing = false;
 
     private PluginInitContext _context = null!;
@@ -89,7 +87,7 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
             }
             catch (Exception e)
             {
-                _initException = e;
+                // ignored
             }
 
             // Wait 30s before retrying
@@ -111,7 +109,7 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
         if (!_scoop.IsInitialized)
         {
             Task.Run(InitScoop);
-            return InitErrorQueryResult();
+            return IsInitializingQueryResult();
         }
 
         if (!delayedExecution || query is null || string.IsNullOrWhiteSpace(query.Search))
@@ -151,23 +149,16 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
         ];
     }
 
-    private List<Result> InitErrorQueryResult()
+    private List<Result> IsInitializingQueryResult()
     {
         return
         [
             new Result
             {
-                Title = Properties.Resources.error_init,
-                SubTitle = Properties.Resources.error_init_sub,
+                Title = Properties.Resources.is_init,
+                SubTitle = Properties.Resources.is_init_sub,
                 QueryTextDisplay = " ", // Empty string doesn't work
                 IcoPath = _iconPath,
-                Action = _ =>
-                {
-                    // Create a new issue describing the error
-                    var title = HttpUtility.UrlEncode("Bug: Initialization Failed");
-                    var body = HttpUtility.UrlEncode(_initException?.ToString());
-                    return OpenUrlInBrowser(string.Format(CultureInfo.CurrentCulture, RepositoryNewIssueUrlFormat, title, body));
-                },
             },
         ];
     }

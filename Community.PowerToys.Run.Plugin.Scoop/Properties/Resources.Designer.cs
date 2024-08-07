@@ -96,24 +96,6 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to initialize plugin..
-        /// </summary>
-        public static string error_init {
-            get {
-                return ResourceManager.GetString("error_init", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to If you believe this is a plugin error, press Enter to open an issue..
-        /// </summary>
-        public static string error_init_sub {
-            get {
-                return ResourceManager.GetString("error_init_sub", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Scoop is not installed..
         /// </summary>
         public static string error_scoop_not_installed {
@@ -128,6 +110,24 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         public static string error_scoop_not_installed_sub {
             get {
                 return ResourceManager.GetString("error_scoop_not_installed_sub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Plugin is initializing..
+        /// </summary>
+        public static string is_init {
+            get {
+                return ResourceManager.GetString("is_init", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If you think this is a plugin bug, please open an issue on GitHub..
+        /// </summary>
+        public static string is_init_sub {
+            get {
+                return ResourceManager.GetString("is_init_sub", resourceCulture);
             }
         }
         

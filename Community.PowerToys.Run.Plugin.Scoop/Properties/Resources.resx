@@ -144,11 +144,11 @@
   <data name="plugin_description_sub" xml:space="preserve">
     <value>Search, install, update, and uninstall Scoop packages.</value>
   </data>
-  <data name="error_init" xml:space="preserve">
-    <value>Failed to initialize plugin.</value>
+  <data name="is_init" xml:space="preserve">
+    <value>Plugin is initializing.</value>
   </data>
-  <data name="error_init_sub" xml:space="preserve">
-    <value>If you believe this is a plugin error, press Enter to open an issue.</value>
+  <data name="is_init_sub" xml:space="preserve">
+    <value>If you think this is a plugin bug, please open an issue on GitHub.</value>
   </data>
   <data name="message_add_bucket" xml:space="preserve">
     <value>To install this package, you need to add the bucket '{0}'. Do you want to continue?</value>
