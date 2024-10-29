@@ -1,4 +1,4 @@
-# Scoop Plugin for PowerToys Run
+# Scoop Plugin for PowerToys Run [![Mentioned in Awesome PowerToys Run Plugins](https://awesome.re/mentioned-badge.svg)](https://github.com/hlaueriksson/awesome-powertoys-run-plugins)
 
 This is a plugin for [PowerToys Run](https://github.com/microsoft/PowerToys/wiki/PowerToys-Run-Overview) that allows you to search, install, update and uninstall packages from the [Scoop](https://scoop.sh/) package manager.
 
