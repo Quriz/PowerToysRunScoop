@@ -100,7 +100,6 @@ public partial class StatusWindow : INotifyPropertyChanged
         DataContext = this;
 
         UpdateWindowBackground();
-        UpdateTitleBarButtonsVisibility();
 
         WindowChrome.SetWindowChrome(
             this,
@@ -191,14 +190,6 @@ public partial class StatusWindow : INotifyPropertyChanged
         {
             this.SetResourceReference(BackgroundProperty, "WindowBackground");
         }
-    }
-
-    private void UpdateTitleBarButtonsVisibility()
-    {
-        if (Utility.IsBackdropDisabled() || !Utility.IsBackdropSupported() || SystemParameters.HighContrast)
-            TitleBarCloseButton.Visibility = Visibility.Visible;
-        else
-            TitleBarCloseButton.Visibility = Visibility.Collapsed;
     }
 
     /// <summary>

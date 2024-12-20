@@ -72,7 +72,7 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
                 _scoop.Init();
                 return;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // ignored
             }
@@ -82,22 +82,6 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
         }
         
         _isInitializing = false;
-
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            try
-            {
-                var window = new StatusWindow(new Scoop.Package("Blender", "", "4.5.6", "https://www.blender.org", new Scoop.PackageMetadata("","")), Scoop.PackageAction.Update, "");
-                window.Show();
-                window.Activate();
-                window.ProgressBarColor = Brushes.Green;
-                window.Status = "Test Status...";
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message, Properties.Resources.plugin_name, MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        });
     }
 
     public List<Result> Query(Query query) => Query(query, false);

@@ -2,6 +2,5 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Community.PowerToys.Run.Plugin.Scoop;component/Controls/HyperlinkButton.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Community.PowerToys.Run.Plugin.Scoop;component/Controls/ProgressBar.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Community.PowerToys.Run.Plugin.Scoop;component/Controls/Window.xaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

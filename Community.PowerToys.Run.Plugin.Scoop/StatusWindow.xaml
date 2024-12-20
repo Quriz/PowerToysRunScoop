@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="clr-namespace:Community.PowerToys.Run.Plugin.Scoop.Controls"
+    mc:Ignorable="d"
     d:DataContext="{Binding RelativeSource={RelativeSource Self}}"
     Title="PowerToys Run: Scoop"
     MinWidth="450"
@@ -18,8 +19,7 @@
     WindowStartupLocation="CenterScreen"
     ShowInTaskbar="True"
     Icon="/Community.PowerToys.Run.Plugin.Scoop;component/Images/scoop.ico"
-    SourceInitialized="OnSourceInitialized"
-    mc:Ignorable="d">
+    SourceInitialized="OnSourceInitialized">
 
     <Window.InputBindings>
         <KeyBinding Key="Enter" Command="{Binding ButtonPressedCommand}" />
@@ -29,50 +29,14 @@
         x:Name="MainGrid" 
         Background="{DynamicResource StatusWindowMainBackgroundBrush}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="44" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <!-- Window TitleBar -->
-        <Grid
-            Grid.Row="0"
-            Height="44">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <StackPanel
-                Grid.Column="1"
-                Margin="12,0,0,0"
-                Orientation="Horizontal">
-                <Image
-                    Width="20"
-                    VerticalAlignment="Center"
-                    Source="/Community.PowerToys.Run.Plugin.Scoop;component/Images/scoop.png" />
-                <TextBlock
-                    Margin="16,0,0,0"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    AutomationProperties.HeadingLevel="Level1"
-                    Text="PowerToys Run: Scoop" />
-            </StackPanel>
-
-            <Button
-                x:Name="TitleBarCloseButton"
-                Grid.Column="4"
-                Click="OnCloseButtonClick"
-                Style="{StaticResource TitleBarDefaultCloseButtonStyle}">
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontFamily="{StaticResource SymbolThemeFontFamily}"
-                    FontSize="16"
-                    Text="&#xE711;" />
-            </Button>
-        </Grid>
+        <controls:TitleBar
+            Title="PowerToys Run: Scoop"
+            Icon="/Community.PowerToys.Run.Plugin.Scoop;component/Images/scoop.png"/>
 
         <!-- Window Content -->
         <Grid Grid.Row="1">
