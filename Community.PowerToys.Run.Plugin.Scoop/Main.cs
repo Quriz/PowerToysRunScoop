@@ -1,21 +1,8 @@
-﻿// Copyright (c) Microsoft Corporation
-// The Microsoft Corporation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Net.Cache;
-using System.Net.Http;
-using System.Net.Http.Json;
+﻿using System.Globalization;
 using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Web;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using ManagedCommon;
 using Wox.Infrastructure;
@@ -95,6 +82,22 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
         }
         
         _isInitializing = false;
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            try
+            {
+                var window = new StatusWindow(new Scoop.Package("Blender", "", "4.5.6", "https://www.blender.org", new Scoop.PackageMetadata("","")), Scoop.PackageAction.Update, "");
+                window.Show();
+                window.Activate();
+                window.ProgressBarColor = Brushes.Green;
+                window.Status = "Test Status...";
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message, Properties.Resources.plugin_name, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        });
     }
 
     public List<Result> Query(Query query) => Query(query, false);

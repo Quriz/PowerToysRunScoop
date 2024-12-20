@@ -1,15 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation
-// The Microsoft Corporation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
-using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using System.Windows;
 
 namespace Community.PowerToys.Run.Plugin.Scoop;
 
-public static class Helper
+public static class Utility
 {
     /// <summary>
     /// Get favicon URI for homepage of package
@@ -26,17 +20,18 @@ public static class Helper
     /// </summary>
     /// <param name="message">The message to show</param>
     /// <returns>Which button was clicked</returns>
-    public static Wpf.Ui.Controls.MessageBoxResult ShowMessageBoxYesNo(string message)
+    public static MessageBoxResult ShowMessageBoxYesNo(string message)
         => Application.Current.Dispatcher.Invoke(() =>
         {
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = "PowerToys Run: Scoop",
-                Content = message,
-                PrimaryButtonText = Properties.Resources.messagebox_yes,
-                CloseButtonText = Properties.Resources.messagebox_no,
-            };
-            return uiMessageBox.ShowDialogAsync().Result;
+            return MessageBox.Show(message, "PowerToys Run: Scoop", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            // var uiMessageBox = new MessageBox
+            // {
+            //     Title = "PowerToys Run: Scoop",
+            //     Content = message,
+            //     PrimaryButtonText = Properties.Resources.messagebox_yes,
+            //     CloseButtonText = Properties.Resources.messagebox_no,
+            // };
+            // return uiMessageBox.ShowDialogAsync().Result;
         });
 
     /// <summary>
@@ -85,5 +80,28 @@ public static class Helper
         }
 
         await process.WaitForExitAsync();
+    }
+    
+    // Copied from https://github.com/microsoft/WPF-Samples/blob/main/Sample%20Applications/WPFGallery/Helpers/Utility.cs
+    public static bool IsBackdropSupported()
+    {
+        var os = Environment.OSVersion;
+        var version = os.Version;
+
+        return version.Major >= 10 && version.Build >= 22621;
+    }
+
+    // Copied from https://github.com/microsoft/WPF-Samples/blob/main/Sample%20Applications/WPFGallery/Helpers/Utility.cs
+    public static bool IsBackdropDisabled()
+    {
+        var appContextBackdropData = AppContext.GetData("Switch.System.Windows.Appearance.DisableFluentThemeWindowBackdrop");
+        bool disableFluentThemeWindowBackdrop = false;
+
+        if (appContextBackdropData != null)
+        {
+            disableFluentThemeWindowBackdrop = bool.Parse(Convert.ToString(appContextBackdropData));
+        }
+
+        return disableFluentThemeWindowBackdrop;
     }
 }

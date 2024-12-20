@@ -44,9 +44,6 @@
         <Reference Include="Wox.Plugin">
             <HintPath>.\Lib\Wox.Plugin.dll</HintPath>
         </Reference>
-        <Reference Include="WPF-UI">
-            <HintPath>.\Lib\Wpf.Ui.dll</HintPath>
-        </Reference>
         <Reference Include="Microsoft.Xaml.Behaviors">
             <HintPath>.\Lib\Microsoft.Xaml.Behaviors.dll</HintPath>
         </Reference>
@@ -72,6 +69,7 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <Resource Include="Images\scoop.ico" />
+        <Resource Include="Images\scoop.png" />
     </ItemGroup>
 
 </Project>

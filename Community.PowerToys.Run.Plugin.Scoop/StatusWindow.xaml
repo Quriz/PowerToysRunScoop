@@ -1,4 +1,4 @@
-﻿<ui:FluentWindow
+﻿<Window
     x:Class="Community.PowerToys.Run.Plugin.Scoop.StatusWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,7 +6,7 @@
     xmlns:p="clr-namespace:Community.PowerToys.Run.Plugin.Scoop.Properties"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:controls="clr-namespace:Community.PowerToys.Run.Plugin.Scoop.Controls"
     d:DataContext="{Binding RelativeSource={RelativeSource Self}}"
     Title="PowerToys Run: Scoop"
     MinWidth="450"
@@ -15,111 +15,148 @@
     Height="185"
     SizeToContent="Height"
     ResizeMode="NoResize"
-    ExtendsContentIntoTitleBar="True"
-    WindowStyle="SingleBorderWindow"
     WindowStartupLocation="CenterScreen"
     ShowInTaskbar="True"
     Icon="/Community.PowerToys.Run.Plugin.Scoop;component/Images/scoop.ico"
+    SourceInitialized="OnSourceInitialized"
     mc:Ignorable="d">
-    
-    <Grid x:Name="RootGrid">
-        <!--  We set the background here because the Acrylic can be too translucent / background too bright on Light theme  -->
-        <Grid.Background>
-            <SolidColorBrush Opacity="0.8" Color="{DynamicResource ApplicationBackgroundColor}" />
-        </Grid.Background>
-        
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="60" />
-        </Grid.RowDefinitions>
-        
-        <!-- Main Content: Package Icon & Name, Status, Progress Bar -->
-        <Grid Background="{DynamicResource LayerOnAcrylicFillColorDefaultBrush}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-        
-            <!-- TitleBar -->
-            <ui:TitleBar
-                Grid.Row="0"
-                Title="PowerToys Run: Scoop"
-                Height="32"
-                Padding="12,0,16,0"
-                ShowMaximize="False"
-                ShowMinimize="False"
-                ShowClose="True">
-                <ui:TitleBar.Icon>
-                    <ui:ImageIcon Source="/Community.PowerToys.Run.Plugin.Scoop;component/Images/scoop.ico" />
-                </ui:TitleBar.Icon>
-            </ui:TitleBar>
-        
-            <StackPanel
-                Grid.Row="1" 
-                Margin="12, 8">
-                <!-- Heading: App Icon & Name -->
-                <StackPanel Orientation="Horizontal">
-                    <ui:ImageIcon 
-                        Height="24" 
-                        VerticalAlignment="Center" 
-                        Source="{Binding IconUri}"/>
-                    <ui:TextBlock 
-                        Text="{Binding ActionPrefix}"
-                        Margin="8,0,0,0"
-                        FontSize="24"
-                        Appearance="Secondary"/>
-                    <ui:TextBlock 
-                        Text="{Binding Package.Name}"
-                        FontSize="24"
-                        Appearance="Primary"
-                        FontTypography="BodyStrong"/>
-                    <ui:TextBlock 
-                        Text="{Binding VersionSuffix}"
-                        FontSize="24"
-                        Appearance="Secondary"/>
-                </StackPanel>
-            
-                <!-- Status -->
-                <ui:TextBlock 
-                    x:Name="StatusText"
-                    Text="{Binding Status}"
-                    Appearance="Tertiary"/>
-            
-                <!-- Status Progress Bar-->
-                <ProgressBar x:Name="StatusProgressBar" IsIndeterminate="True" Margin="0,8,0,0" />
-            </StackPanel>
-        </Grid>
-        
-        <!-- Bottom Panel -->
-        <DockPanel 
-            Grid.Row="1"
-            LastChildFill="False" 
-            VerticalAlignment="Center"
-            Margin="8, 0, 16, 0">
-            <ui:HyperlinkButton 
-                DockPanel.Dock="Left"
-                NavigateUri="{Binding Package.Homepage}">
-                Homepage
-            </ui:HyperlinkButton>
-            <ui:Button 
-                DockPanel.Dock="Right"
-                Content="{x:Static p:Resources.statuswindow_btn_open}"
-                IsEnabled="{Binding OpenButtonEnabled}"
-                Click="OnOpenButtonClick"
-                Appearance="Primary"
-                Visibility="{Binding OpenButtonVisibility}"
-                MinWidth="150"/>
-            <ui:Button 
-                DockPanel.Dock="Right"
-                Content="{x:Static p:Resources.statuswindow_btn_close}"
-                Click="OnCloseButtonClick"
-                Appearance="Primary"
-                Visibility="{Binding CloseButtonVisibility}"
-                MinWidth="150"/>
-        </DockPanel>
-    </Grid>
-    
-    <ui:FluentWindow.InputBindings>
+
+    <Window.InputBindings>
         <KeyBinding Key="Enter" Command="{Binding ButtonPressedCommand}" />
-    </ui:FluentWindow.InputBindings>
-</ui:FluentWindow>
+    </Window.InputBindings>
+
+    <Grid 
+        x:Name="MainGrid" 
+        Background="{DynamicResource StatusWindowMainBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="44" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Window TitleBar -->
+        <Grid
+            Grid.Row="0"
+            Height="44">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel
+                Grid.Column="1"
+                Margin="12,0,0,0"
+                Orientation="Horizontal">
+                <Image
+                    Width="20"
+                    VerticalAlignment="Center"
+                    Source="/Community.PowerToys.Run.Plugin.Scoop;component/Images/scoop.png" />
+                <TextBlock
+                    Margin="16,0,0,0"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    AutomationProperties.HeadingLevel="Level1"
+                    Text="PowerToys Run: Scoop" />
+            </StackPanel>
+
+            <Button
+                x:Name="TitleBarCloseButton"
+                Grid.Column="4"
+                Click="OnCloseButtonClick"
+                Style="{StaticResource TitleBarDefaultCloseButtonStyle}">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontFamily="{StaticResource SymbolThemeFontFamily}"
+                    FontSize="16"
+                    Text="&#xE711;" />
+            </Button>
+        </Grid>
+
+        <!-- Window Content -->
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="60" />
+            </Grid.RowDefinitions>
+
+            <!-- Package Icon & Name, Status, Progress Bar -->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel
+                    Grid.Row="1"
+                    Margin="12, 8">
+                    <!-- Heading: App Icon & Name -->
+                    <StackPanel Orientation="Horizontal">
+                        <Image
+                            Height="24"
+                            VerticalAlignment="Center"
+                            Source="{Binding IconUri}" />
+                        <TextBlock
+                            Text="{Binding ActionPrefix}"
+                            Margin="8,0,0,0"
+                            FontSize="24"
+                            Foreground="{DynamicResource StatusWindowTextSecondaryBrush}" />
+                        <TextBlock
+                            Text="{Binding Package.Name}"
+                            FontSize="24"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource StatusWindowTextPrimaryBrush}" />
+                        <TextBlock
+                            Text="{Binding VersionSuffix}"
+                            FontSize="24"
+                            Foreground="{DynamicResource StatusWindowTextSecondaryBrush}" />
+                    </StackPanel>
+
+                    <!-- Status -->
+                    <TextBlock
+                        x:Name="StatusText"
+                        Text="{Binding Status}"
+                        Foreground="{DynamicResource StatusWindowTextTertiaryBrush}" />
+
+                    <!-- Status Progress Bar-->
+                    <ProgressBar
+                        x:Name="StatusProgressBar"
+                        IsIndeterminate="True"
+                        Margin="0,8,0,0" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Bottom Panel -->
+            <Grid
+                Grid.Row="1"
+                Background="{DynamicResource StatusWindowBottomPanelBackgroundBrush}">
+                <DockPanel
+                    LastChildFill="False"
+                    VerticalAlignment="Center"
+                    Margin="8, 0, 16, 0">
+                    <controls:HyperlinkButton
+                        NavigateUri="{Binding Package.Homepage}"
+                        DockPanel.Dock="Left">
+                        Homepage
+                    </controls:HyperlinkButton>
+                    <Button
+                        DockPanel.Dock="Right"
+                        Content="{x:Static p:Resources.statuswindow_btn_open}"
+                        IsEnabled="{Binding OpenButtonEnabled}"
+                        Click="OnOpenButtonClick"
+                        Style="{DynamicResource AccentButtonStyle}"
+                        Visibility="{Binding OpenButtonVisibility}"
+                        MinWidth="150" />
+                    <Button
+                        DockPanel.Dock="Right"
+                        Content="{x:Static p:Resources.statuswindow_btn_close}"
+                        Click="OnCloseButtonClick"
+                        Style="{DynamicResource AccentButtonStyle}"
+                        Visibility="{Binding CloseButtonVisibility}"
+                        MinWidth="150" />
+                </DockPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

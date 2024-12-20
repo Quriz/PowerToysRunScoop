@@ -14,7 +14,6 @@ sudo {
 		'PowerToys.Settings.UI.Lib.dll',
 		'Wox.Infrastructure.dll',
 		'Wox.Plugin.dll',
-		'Wpf.Ui.dll',
 		'Microsoft.Xaml.Behaviors.dll'
 	) | ForEach-Object {
 		New-Item ./Lib/$_ -ItemType SymbolicLink -Value "$ptPath\$_"

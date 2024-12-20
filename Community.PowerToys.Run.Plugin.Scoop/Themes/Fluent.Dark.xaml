@@ -1,0 +1,17 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Reference: https://github.com/dotnet/wpf/blob/main/src/Microsoft.DotNet.Wpf/src/Themes/PresentationFramework.Fluent/Themes/Fluent.Dark.xaml -->
+
+    <!-- StatusWindow -->
+    <SolidColorBrush x:Key="StatusWindowTextPrimaryBrush" Color="{DynamicResource TextFillColorPrimary}" />
+    <SolidColorBrush x:Key="StatusWindowTextSecondaryBrush" Color="{DynamicResource TextFillColorSecondary}" />
+    <SolidColorBrush x:Key="StatusWindowTextTertiaryBrush" Color="{DynamicResource TextFillColorTertiary}" />
+    <SolidColorBrush x:Key="StatusWindowMainBackgroundBrush" Color="{DynamicResource LayerOnAcrylicFillColorDefault}" />
+    <SolidColorBrush x:Key="StatusWindowBottomPanelBackgroundBrush" Color="{DynamicResource ApplicationBackgroundColor}" />
+
+    <!-- HyperlinkButton -->
+    <SolidColorBrush x:Key="HyperlinkButtonForegroundBrush" Color="{DynamicResource AccentTextFillColorDisabled}" />
+    <SolidColorBrush x:Key="HyperlinkButtonBackgroundBrush" Color="Transparent" />
+    <SolidColorBrush x:Key="HyperlinkButtonBackgroundPointerOverBrush" Color="{DynamicResource ControlFillColorSecondary}" />
+    <SolidColorBrush x:Key="HyperlinkButtonTextPointerOverBrush" Color="{DynamicResource TextFillColorTertiary}" />
+</ResourceDictionary>

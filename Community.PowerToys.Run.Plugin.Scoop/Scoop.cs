@@ -1,25 +1,15 @@
-﻿// Copyright (c) Microsoft Corporation
-// The Microsoft Corporation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using Wox.Plugin.Logger;
-using MessageBoxResult = Wpf.Ui.Controls.MessageBoxResult;
 
 namespace Community.PowerToys.Run.Plugin.Scoop;
 
@@ -204,7 +194,7 @@ public partial class Scoop : IDisposable
 
     private void GetInstalledBuckets()
     {
-        if (!Helper.RunCmdWithOutput("scoop bucket list", out var output))
+        if (!Utility.RunCmdWithOutput("scoop bucket list", out var output))
         {
             InstalledBucketSourceUrls = [];
             return;
@@ -230,7 +220,7 @@ public partial class Scoop : IDisposable
 
     private void GetInstalledPackages()
     {
-        if (!Helper.RunCmdWithOutput("scoop list", out var output))
+        if (!Utility.RunCmdWithOutput("scoop list", out var output))
         {
             InstalledPackages = [];
             return;
@@ -312,8 +302,8 @@ public partial class Scoop : IDisposable
             // Ask to update package if it is already installed
             if (InstalledPackages.Contains(package.Name))
             {
-                var choice = Helper.ShowMessageBoxYesNo(string.Format(CultureInfo.CurrentCulture, MessageUpdateInstead, package.Name));
-                if (choice == MessageBoxResult.Primary)
+                var choice = Utility.ShowMessageBoxYesNo(string.Format(CultureInfo.CurrentCulture, MessageUpdateInstead, package.Name));
+                if (choice == MessageBoxResult.Yes)
                 {
                     Update(package);
                 }
@@ -326,8 +316,8 @@ public partial class Scoop : IDisposable
         else
         {
             // Ask to add bucket
-            var choice = Helper.ShowMessageBoxYesNo(string.Format(CultureInfo.CurrentCulture, MessageAddBucketFormat, bucketName));
-            if (choice == MessageBoxResult.Primary)
+            var choice = Utility.ShowMessageBoxYesNo(string.Format(CultureInfo.CurrentCulture, MessageAddBucketFormat, bucketName));
+            if (choice == MessageBoxResult.Yes)
             {
                 RunCmdInStatusWindow($"{addBucketCommand} && {installPackageCommand}", package, PackageAction.Install, OnExit);
             }
@@ -398,7 +388,7 @@ public partial class Scoop : IDisposable
             var currentProgress = -1;
 
             // Run command
-            await Helper.RunCmdWithOutputCallback(command, OnCharRead);
+            await Utility.RunCmdWithOutputCallback(command, OnCharRead);
 
             // Hide progress bar if command exited before starting action
             if (currentProgress == -1)

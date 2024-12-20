@@ -1,0 +1,7 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Community.PowerToys.Run.Plugin.Scoop;component/Controls/HyperlinkButton.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Community.PowerToys.Run.Plugin.Scoop;component/Controls/ProgressBar.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Community.PowerToys.Run.Plugin.Scoop;component/Controls/Window.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

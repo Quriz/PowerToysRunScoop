@@ -1,19 +1,16 @@
-﻿// Copyright (c) Microsoft Corporation
-// The Microsoft Corporation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Shell;
 using System.Windows.Threading;
-using Common.UI;
 using Microsoft.Xaml.Behaviors.Core;
-using Wpf.Ui.Appearance;
+using Common.UI;
+using ManagedCommon;
 
 namespace Community.PowerToys.Run.Plugin.Scoop;
 
@@ -68,15 +65,54 @@ public partial class StatusWindow : INotifyPropertyChanged
 
     public ICommand ButtonPressedCommand { get; private set; }
 
-    private string? _openShortcutPath;
+    private readonly string? _openShortcutPath;
+
+    // The enum flag for DwmSetWindowAttribute's second parameter, which tells the function what attribute to set.
+    public enum DWMWINDOWATTRIBUTE
+    {
+        DWMWA_WINDOW_CORNER_PREFERENCE = 33,
+    }
+
+    // The DWM_WINDOW_CORNER_PREFERENCE enum for DwmSetWindowAttribute's third parameter, which tells the function
+    // what value of the enum to set.
+    // Copied from dwmapi.h
+    public enum DWM_WINDOW_CORNER_PREFERENCE
+    {
+        DWMWCP_DEFAULT = 0,
+        DWMWCP_DONOTROUND = 1,
+        DWMWCP_ROUND = 2,
+        DWMWCP_ROUNDSMALL = 3,
+    }
+
+    // Import dwmapi.dll and define DwmSetWindowAttribute in C# corresponding to the native function.
+    [DllImport("dwmapi.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+    internal static extern void DwmSetWindowAttribute(
+        IntPtr hwnd,
+        DWMWINDOWATTRIBUTE attribute,
+        ref DWM_WINDOW_CORNER_PREFERENCE pvAttribute,
+        uint cbAttribute);
 
     public StatusWindow(Scoop.Package package, Scoop.PackageAction action, string? openShortcutPath)
     {
+        SetSystemTheme();
+        
         InitializeComponent();
         DataContext = this;
 
-        WindowBackdropType = OSVersionHelper.IsWindows11() ? Wpf.Ui.Controls.WindowBackdropType.Acrylic : Wpf.Ui.Controls.WindowBackdropType.None;
-        SystemThemeWatcher.Watch(this, WindowBackdropType);
+        UpdateWindowBackground();
+        UpdateTitleBarButtonsVisibility();
+
+        WindowChrome.SetWindowChrome(
+            this,
+            new WindowChrome
+            {
+                CaptionHeight = 50,
+                CornerRadius = default,
+                GlassFrameThickness = new Thickness(-1),
+                ResizeBorderThickness = ResizeMode == ResizeMode.NoResize ? default : new Thickness(4),
+                UseAeroCaptionButtons = true
+            }
+        );
 
         Package = package;
         IconUri = package.GetFaviconUri();
@@ -99,6 +135,18 @@ public partial class StatusWindow : INotifyPropertyChanged
         SetupButtons(action, forceCloseButton);
 
         ButtonPressedCommand = new ActionCommand(OnButtonPressed);
+    }
+
+    private void OnSourceInitialized(object sender, EventArgs e)
+    {
+        if (OSVersionHelper.IsWindows11())
+        {
+            // ResizeMode="NoResize" removes rounded corners. So force them to rounded.
+            IntPtr hWnd = new WindowInteropHelper(GetWindow(this)!).EnsureHandle();
+            DWMWINDOWATTRIBUTE attribute = DWMWINDOWATTRIBUTE.DWMWA_WINDOW_CORNER_PREFERENCE;
+            DWM_WINDOW_CORNER_PREFERENCE preference = DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND;
+            DwmSetWindowAttribute(hWnd, attribute, ref preference, sizeof(uint));
+        }
     }
 
     private void SetupButtons(Scoop.PackageAction action, bool forceCloseButton)
@@ -134,6 +182,23 @@ public partial class StatusWindow : INotifyPropertyChanged
             OpenButtonVisibility = Visibility.Collapsed;
             CloseButtonVisibility = Visibility.Visible;
         }
+    }
+
+    private void UpdateWindowBackground()
+    {
+        if((!Utility.IsBackdropDisabled() && 
+            !Utility.IsBackdropSupported()))
+        {
+            this.SetResourceReference(BackgroundProperty, "WindowBackground");
+        }
+    }
+
+    private void UpdateTitleBarButtonsVisibility()
+    {
+        if (Utility.IsBackdropDisabled() || !Utility.IsBackdropSupported() || SystemParameters.HighContrast)
+            TitleBarCloseButton.Visibility = Visibility.Visible;
+        else
+            TitleBarCloseButton.Visibility = Visibility.Collapsed;
     }
 
     /// <summary>
@@ -200,6 +265,43 @@ public partial class StatusWindow : INotifyPropertyChanged
     private void OnCloseButtonClick(object sender, RoutedEventArgs e)
     {
         this.Close();
+    }
+    
+    // Based on From PowerLauncher.Helper.ThemeManager.SetSystemTheme()
+    private void SetSystemTheme()
+    {
+        this.Resources.MergedDictionaries.Clear();
+        
+        var theme = new ThemeManager(Application.Current).GetCurrentTheme();
+        
+        // WPF Fluent theme
+        const string fluentThemePathPrefix = "pack://application:,,,/PresentationFramework.Fluent;component/Themes";
+        AddResourceDictionary(theme == Theme.Light 
+            ? $"{fluentThemePathPrefix}/Fluent.Light.xaml"
+            : $"{fluentThemePathPrefix}/Fluent.Dark.xaml");
+        
+        // Custom Fluent styles
+        const string customThemePathPrefix = "pack://application:,,,/Community.PowerToys.Run.Plugin.Scoop;component/Themes";
+        AddResourceDictionary(theme == Theme.Light 
+            ? $"{customThemePathPrefix}/Fluent.Light.xaml"
+            : $"{customThemePathPrefix}/Fluent.Dark.xaml");
+        AddResourceDictionary($"{customThemePathPrefix}/Fluent.xaml");
+        
+        if (!OSVersionHelper.IsWindows11())
+        {
+            // Apply background only on Windows 10
+            // Windows theme does not work properly for dark and light mode so right now set the background color manual.
+            this.Background = new SolidColorBrush
+            {
+                Color = theme is Theme.Dark ? (Color)ColorConverter.ConvertFromString("#202020") : (Color)ColorConverter.ConvertFromString("#fafafa"),
+            };
+        }
+        return;
+        
+        void AddResourceDictionary(string absolutePath) => this.Resources.MergedDictionaries.Add(new ResourceDictionary
+        {
+            Source = new Uri(absolutePath, UriKind.Absolute),
+        });
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

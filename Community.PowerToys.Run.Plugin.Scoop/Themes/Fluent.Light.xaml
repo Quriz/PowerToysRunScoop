@@ -1,0 +1,17 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Reference: https://github.com/dotnet/wpf/blob/main/src/Microsoft.DotNet.Wpf/src/Themes/PresentationFramework.Fluent/Themes/Fluent.Light.xaml -->
+
+    <!-- StatusWindow -->
+    <SolidColorBrush x:Key="StatusWindowTextPrimaryBrush" Color="{DynamicResource TextFillColorPrimary}" />
+    <SolidColorBrush x:Key="StatusWindowTextSecondaryBrush" Color="{DynamicResource TextFillColorPrimary}" Opacity="0.9" />
+    <SolidColorBrush x:Key="StatusWindowTextTertiaryBrush" Color="{DynamicResource TextFillColorPrimary}" Opacity="0.8" />
+    <SolidColorBrush x:Key="StatusWindowMainBackgroundBrush" Color="{DynamicResource ApplicationBackgroundColor}" />
+    <SolidColorBrush x:Key="StatusWindowBottomPanelBackgroundBrush" Color="{DynamicResource {x:Static SystemColors.AccentColorLight3Key}}" Opacity="0.2" />
+    
+    <!-- HyperlinkButton -->
+    <SolidColorBrush x:Key="HyperlinkButtonForegroundBrush" Color="{DynamicResource TextFillColorPrimary}" />
+    <SolidColorBrush x:Key="HyperlinkButtonBackgroundBrush" Color="Transparent" />
+    <SolidColorBrush x:Key="HyperlinkButtonBackgroundPointerOverBrush" Color="{DynamicResource {x:Static SystemColors.AccentColorLight1Key}}" Opacity="0.2" />
+    <SolidColorBrush x:Key="HyperlinkButtonTextPointerOverBrush" Color="{DynamicResource TextFillColorPrimary}" />
+</ResourceDictionary>
