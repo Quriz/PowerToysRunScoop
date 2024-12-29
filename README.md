@@ -4,9 +4,6 @@ This is a plugin for [PowerToys Run](https://github.com/microsoft/PowerToys/wiki
 
 ![banner](https://github.com/Quriz/PowerToysRunScoop/assets/75581292/4b76a285-aff2-4515-adab-9ed4ab37fa13)
 
-> [!IMPORTANT]
-> This plugin currently doesn't work with PowerToys v0.87.0 or later. An update is in progress.
-
 ## Features
 
 - Search for packages in all Scoop repositories
