@@ -1,8 +1,6 @@
 ﻿using System.Globalization;
 using System.Text;
-using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using ManagedCommon;
 using Wox.Infrastructure;
@@ -210,6 +208,9 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
 
         var contextResults = new List<ContextMenuResult>();
 
+        var isPackageInstalled = _scoop.InstalledPackages.Contains(package.Name);
+
+        // Open homepage option
         contextResults.Add(new ContextMenuResult
         {
             PluginName = Name,
@@ -221,8 +222,9 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
             Action = _ => OpenUrlInBrowser(package.Homepage),
         });
 
-        if (_scoop.InstalledPackages.Contains(package.Name))
+        if (isPackageInstalled)
         {
+            // Update option
             contextResults.Add(new ContextMenuResult
             {
                 PluginName = Name,
@@ -238,6 +240,7 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
                 },
             });
 
+            // Uninstall option
             contextResults.Add(new ContextMenuResult
             {
                 PluginName = Name,
@@ -253,13 +256,29 @@ public class Main : IPlugin, IPluginI18n, IDelayedExecutionPlugin, IContextMenu,
                 },
             });
         }
+        else
+        {
+            // Install option
+            contextResults.Add(new ContextMenuResult
+            {
+                PluginName = Name,
+                Title = Properties.Resources.context_menu_install,
+                Glyph = "\xE896", // Download
+                FontFamily = "Segoe Fluent Icons,Segoe MDL2 Assets",
+                Action = _ =>
+                {
+                    _scoop.Install(package);
+                    return true;
+                },
+            });
+        }
 
         return contextResults;
     }
 
     private bool OpenUrlInBrowser(string url)
     {
-        if (Wox.Infrastructure.Helper.OpenInShell(DefaultBrowserInfo.Path, url))
+        if (Helper.OpenInShell(DefaultBrowserInfo.Path, url))
         {
             return true;
         }

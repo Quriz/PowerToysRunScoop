@@ -69,6 +69,15 @@ namespace Community.PowerToys.Run.Plugin.Scoop.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Install (Enter).
+        /// </summary>
+        public static string context_menu_install {
+            get {
+                return ResourceManager.GetString("context_menu_install", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Uninstall (Ctrl+D).
         /// </summary>
         public static string context_menu_uninstall {
